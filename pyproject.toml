@@ -9,7 +9,7 @@ description = "Stage-to-brink job-application automation + profile-driven resume
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-authors = [{ name = "Sam Rivera" }]
+authors = [{ name = "Jordan Bradshaw", email = "jobradshaw98@gmail.com" }]
 keywords = ["job-search", "ats", "automation", "playwright", "resume", "cover-letter"]
 dependencies = [
     "playwright>=1.49",

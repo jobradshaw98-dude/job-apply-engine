@@ -12,8 +12,10 @@ A job-application toolkit that does two things from your own structured profile:
 > Every run stops one click short. You review the filled form and the drafted documents, then
 > *you* submit. This is a deliberate, load-bearing design choice — see [Safety & scope](#safety--scope).
 
-Everything ships with a **fictional sample applicant ("Sam Rivera")** — no real personal data. Bring
-your own profile and it writes from *your* facts.
+> **About the sample data:** the bundled applicant **"Sam Rivera" is a fictional placeholder** —
+> an invented person whose résumé, profile, and example letters exist only so the tool runs out of
+> the box. Sam Rivera is not the author and not a real person. Replace the examples with your own
+> facts and the tool writes from *yours*. (Author/maintainer: Jordan Bradshaw — see [About](#about).)
 
 > **Design stance:** an LLM is great at *drafting and reasoning* and untrustworthy as a *gate*. So
 > every decision that must be correct — is this field filled? is the applicant work-authorized? is
@@ -151,6 +153,14 @@ exactly which and why. CI runs the suite on Python 3.11 + 3.12 on every push.
 | `apply_engine/tests/` | 100+ test files; `tests/fixtures/` real-ATS HTML |
 | `examples/` | Sample job + profile to copy and fill in |
 
+## About
+
+Built by **Jordan Bradshaw** — an R&D / simulation engineer (FEA, design optimization) who builds
+AI agent systems to multiply engineering work. This is the "ships real, tested product" tool from a
+broader personal multi-agent system, [ARIA](https://github.com/jobradshaw98-dude/aria).
+
+*(The sample applicant "Sam Rivera" throughout the examples is fictional — see the note at the top.)*
+
 ## License
 
-[MIT](LICENSE).
+[MIT](LICENSE) © 2026 Jordan Bradshaw.
