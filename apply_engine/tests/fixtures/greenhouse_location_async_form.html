@@ -1,0 +1,104 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Greenhouse (modern) — async Location (City) react-select + work-auth react-select</title></head>
+<body>
+<form id="application_form">
+  <input id="first_name" type="text"><input id="last_name" type="text">
+  <input id="email" type="email"><input id="phone" type="tel">
+  <input id="resume" type="file">
+
+  <!-- ASYNC Location (City) autocomplete: react-select whose options are fetched from a
+       (simulated) geo service ~500ms AFTER the user types. Options come back QUALIFIED
+       ("Austin, TX, USA" / "Austin, California, United States"), so a bare "Austin"
+       must still match the typeahead but the qualified forms are the fallback. -->
+  <div class="field-wrapper">
+    <label class="label select__label">Location (City) *</label>
+    <div class="select__control" data-rsname="location" data-async="1">
+      <div class="select__value-container">
+        <div class="select__placeholder">Select...</div>
+        <span class="select__input-container"><input class="select__input" id="question_location" autocomplete="off"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Work-auth react-select whose label contains the word "country" — must NEVER be hijacked
+       by the location/city driver (the classify_work_auth guard owns it). -->
+  <div class="field-wrapper">
+    <label class="label select__label">Are you legally authorized to work in this country? *</label>
+    <div class="select__control" data-rsname="auth" data-options="Yes|No">
+      <div class="select__value-container">
+        <div class="select__placeholder">Select...</div>
+        <span class="select__input-container"><input class="select__input" id="question_auth" autocomplete="off"></span>
+      </div>
+    </div>
+  </div>
+
+  <button id="submit_app" type="button">Submit Application</button>
+</form>
+<script>
+// React-Select double with an ASYNC option source for the location control.
+//  - Typing builds the menu; for data-async controls the options arrive after a network-ish
+//    delay (during which the menu shows the "No options" notice — the transient loading state
+//    the engine must NOT fast-miss on).
+//  - Options for "location" are QUALIFIED geo strings, filtered by the typed text.
+//  - Selecting sets .select__single-value chip + data-value, clears the input.
+var GEO = ['Austin, TX, USA', 'Austin, California, United States',
+           'Encino, CA, USA', 'San Diego, CA, USA'];
+function syncOptionsFor(ctrl){
+  return (ctrl.dataset.options || '').split('|').filter(Boolean);
+}
+function closeMenus(){
+  document.querySelectorAll('.select__menu').forEach(function(m){ m.remove(); });
+}
+function choose(ctrl, t){
+  ctrl.setAttribute('data-value', t);
+  var vc = ctrl.querySelector('.select__value-container');
+  var ph = ctrl.querySelector('.select__placeholder'); if (ph) ph.remove();
+  var sv = ctrl.querySelector('.select__single-value');
+  if (!sv){ sv = document.createElement('div'); sv.className = 'select__single-value'; vc.insertBefore(sv, vc.firstChild); }
+  sv.textContent = t;
+  var input = ctrl.querySelector('input'); if (input) input.value = '';
+  closeMenus();
+}
+function renderMenu(ctrl, opts){
+  closeMenus();
+  var menu = document.createElement('div'); menu.className = 'select__menu';
+  if (opts.length === 0){
+    var n = document.createElement('div'); n.className = 'select__menu-notice'; n.textContent = 'No options';
+    menu.appendChild(n);
+  } else {
+    opts.forEach(function(t){
+      var o = document.createElement('div'); o.className = 'select__option'; o.textContent = t;
+      o.addEventListener('mousedown', function(e){ e.preventDefault(); e.stopPropagation(); choose(ctrl, t); });
+      menu.appendChild(o);
+    });
+  }
+  ctrl.parentNode.appendChild(menu);
+}
+function buildMenu(ctrl){
+  var input = ctrl.querySelector('input');
+  var filter = ((input && input.value) || '').toLowerCase();
+  if (ctrl.dataset.async){
+    // Show the transient empty/loading menu immediately...
+    renderMenu(ctrl, []);
+    if (!filter) return;
+    // ...then deliver fetched, filtered geo options after a network-ish delay.
+    setTimeout(function(){
+      // bail if the user cleared/retyped since this fetch started
+      var cur = ((ctrl.querySelector('input') || {}).value || '').toLowerCase();
+      if (cur !== filter) return;
+      var opts = GEO.filter(function(o){ return o.toLowerCase().indexOf(filter) > -1; });
+      renderMenu(ctrl, opts);
+    }, 500);
+    return;
+  }
+  var opts = syncOptionsFor(ctrl).filter(function(o){ return o.toLowerCase().indexOf(filter) > -1; });
+  renderMenu(ctrl, opts);
+}
+document.querySelectorAll('.select__control').forEach(function(ctrl){
+  ctrl.addEventListener('click', function(){ buildMenu(ctrl); });
+  var input = ctrl.querySelector('input');
+  if (input){ input.addEventListener('input', function(){ buildMenu(ctrl); }); }
+});
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeMenus(); });
+</script>
+</body></html>

@@ -1,0 +1,42 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Apply (custom Qs)</title></head>
+<body>
+<!-- Greenhouse-style single page: standard fields + sponsorship select (work-auth guard)
+     + a CUSTOM required select + a CUSTOM "check all that apply" checkbox-group.
+     Used to verify the orchestrator single-page custom-Q block wires select + multi paths. -->
+<form id="application_form">
+  <label for="first_name">First Name *</label>
+  <input id="first_name" name="job_application[first_name]" type="text">
+  <label for="last_name">Last Name *</label>
+  <input id="last_name" name="job_application[last_name]" type="text">
+  <label for="email">Email *</label>
+  <input id="email" name="job_application[email]" type="email">
+  <label for="phone">Phone</label>
+  <input id="phone" name="job_application[phone]" type="tel">
+
+  <label for="q_sponsor">Will you now or in the future require sponsorship for employment visa status?</label>
+  <select id="q_sponsor" name="job_application[answers][sponsor]">
+    <option value="">Select...</option>
+    <option value="yes">Yes</option>
+    <option value="no">No</option>
+  </select>
+
+  <!-- custom required dropdown (not work-auth, not standard-mapped) -->
+  <label for="q_exp">Years of simulation experience? *</label>
+  <select id="q_exp" required name="job_application[answers][exp]">
+    <option value="">Select...</option>
+    <option value="a">0-2 years</option>
+    <option value="b">3-5 years</option>
+    <option value="c">5+ years</option>
+  </select>
+
+  <!-- custom "check all that apply" checkbox-group -->
+  <fieldset id="q_langs" class="required">
+    <legend>Language Skill(s) (check all that apply) *</legend>
+    <label for="lang_eng"><input id="lang_eng" type="checkbox" name="lang" value="eng"> English (ENG)</label>
+    <label for="lang_fra"><input id="lang_fra" type="checkbox" name="lang" value="fra"> French (FRA)</label>
+    <label for="lang_man"><input id="lang_man" type="checkbox" name="lang" value="man"> Mandarin (MAN)</label>
+  </fieldset>
+
+  <button id="submit_app" type="button">Submit Application</button>
+</form>
+</body></html>

@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Invisible reCAPTCHA form</title></head>
+<body>
+<!-- INVISIBLE reCAPTCHA: the kind Greenhouse/Ashby drop on EVERY form for background scoring.
+     There is NO rendered widget — only a hidden g-recaptcha-response textarea and a
+     0-size/hidden iframe. This must NOT trip detect_captcha (it submits without a human).
+     detect_captcha -> None. -->
+<form>
+  <input id="email" type="email">
+  <!-- the bare hidden response textarea (the invisible-recaptcha signal that must be ignored) -->
+  <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+            style="display:none" aria-hidden="true"></textarea>
+  <!-- a hidden/zero-size challenge iframe (invisible variant) -->
+  <iframe src="https://www.google.com/recaptcha/api2/bframe?..." title="recaptcha challenge"
+          style="visibility:hidden;width:0;height:0;display:none"></iframe>
+  <button type="submit">Submit Application</button>
+</form>
+</body></html>

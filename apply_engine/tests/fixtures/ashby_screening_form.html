@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Ashby Screening Yes/No</title></head><body>
+<!-- Mirrors live Ashby: Yes/No <button> pairs. Selection = class CONTAINING "_act" on the chosen
+     button (removed from the sibling), exactly as the live adapter reads back. One work-auth
+     question (must be EXCLUDED from screening — its own guard owns it) and two custom screening
+     qualifiers (must be RETURNED by find_screening_yesno_questions). -->
+<form>
+  <input id="_systemfield_name" name="_systemfield_name" type="text">
+  <input id="_systemfield_email" name="_systemfield_email" type="email">
+
+  <div class="_fieldEntry ashby-application-form-field-entry">
+    <label class="ashby-application-form-question-title">Will you now or in the future require sponsorship for employment visa status in the United States?</label>
+    <div class="_yesno"><button type="button">Yes</button><button type="button">No</button></div>
+  </div>
+
+  <div class="_fieldEntry ashby-application-form-field-entry">
+    <label class="ashby-application-form-question-title">Do you have 3+ years in a relevant technical role?</label>
+    <div class="_yesno"><button type="button">Yes</button><button type="button">No</button></div>
+  </div>
+
+  <div class="_fieldEntry ashby-application-form-field-entry">
+    <label class="ashby-application-form-question-title">Are you Hispanic or Latino?</label>
+    <div class="_yesno"><button type="button">Yes</button><button type="button">No</button></div>
+  </div>
+</form>
+<script>
+document.querySelectorAll('.ashby-application-form-field-entry button').forEach(function(b){
+  b.addEventListener('click', function(){
+    b.parentNode.querySelectorAll('button').forEach(x=>x.className='');
+    b.className = '_button _act';
+  });
+});
+</script>
+</body></html>

@@ -1,0 +1,114 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Lever custom form</title></head><body>
+<!-- Mirrors the LIVE Lever (Palantir) custom-question DOM captured 2026-06-01:
+     - custom "cards" <select> dropdowns with NO id, keyed by name="cards[<uuid>][field0]"
+       (first option is a placeholder: "Click Here (...)" or "Select...");
+     - EEO/demographic selects keyed by name="eeo[...]" -> MUST be skipped;
+     - a "check all that apply" checkbox-group with NO fieldset: ~N inputs sharing a name,
+       each with a distinct value that IS the display text, nested in
+       div.application-question > .application-label + .application-field > ul > li > label > input. -->
+<form>
+
+  <!-- (1) id-less custom card select: a "How did you hear" list (placeholder "Select...") -->
+  <li class="application-question custom-question">
+    <label class="application-label">How did you hear about this role? *</label>
+    <div class="application-field">
+      <select name="cards[3f9a1c00-1111-2222-3333-444455556666][field0]" required>
+        <option value="">Select...</option>
+        <option value="LinkedIn">LinkedIn</option>
+        <option value="Referral">Referral</option>
+        <option value="Company website">Company website</option>
+      </select>
+    </div>
+  </li>
+
+  <!-- (1b) id-less custom card select: a university list (placeholder is the "Click Here..." text) -->
+  <li class="application-question custom-question">
+    <label class="application-label">University *</label>
+    <div class="application-field">
+      <select name="cards[aaaa1111-bbbb-2222-cccc-3333dddd4444][field0]" required>
+        <option value="">Click Here (If you encounter an issue, refresh the page)</option>
+        <option value="State University">State University</option>
+        <option value="University of Toronto">University of Toronto</option>
+        <option value="Stanford University">Stanford University</option>
+      </select>
+    </div>
+  </li>
+
+  <!-- (2) EEO selects -> MUST be skipped (protected-class self-ID, left for Sam) -->
+  <li class="application-question">
+    <label class="application-label">Veteran status</label>
+    <div class="application-field">
+      <select name="eeo[veteran]" required>
+        <option value="">Select...</option>
+        <option value="not_veteran">I am not a protected veteran</option>
+        <option value="veteran">I identify as a protected veteran</option>
+      </select>
+    </div>
+  </li>
+  <li class="application-question">
+    <label class="application-label">Disability status</label>
+    <div class="application-field">
+      <select id="disabilitySelectElement" name="eeo[disability]" required>
+        <option value="">Select...</option>
+        <option value="no">No, I do not have a disability</option>
+        <option value="yes">Yes, I have a disability</option>
+      </select>
+    </div>
+  </li>
+  <li class="application-question">
+    <label class="application-label">Gender</label>
+    <div class="application-field">
+      <select name="eeo[gender]" required>
+        <option value="">Select...</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+    </div>
+  </li>
+
+  <!-- (3) work-auth select -> MUST be skipped (work-auth guard owns it) -->
+  <li class="application-question custom-question">
+    <label class="application-label">Are you authorized to work in the United States? *</label>
+    <div class="application-field">
+      <select name="cards[9999eeee-8888-ffff-7777-0000aaaa1111][field0]" required>
+        <option value="">Select...</option>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+    </div>
+  </li>
+
+  <!-- (4) id-less name-grouped checkbox "check all that apply" group (NO fieldset) -->
+  <li class="application-question custom-question">
+    <label class="application-label">Language Skill(s) (check all that apply) *</label>
+    <div class="application-field">
+      <ul>
+        <li><label><input type="checkbox" name="cards[bbbb2222-cccc-3333-dddd-4444eeee5555][field0]" value="English (ENG)"> English (ENG)</label></li>
+        <li><label><input type="checkbox" name="cards[bbbb2222-cccc-3333-dddd-4444eeee5555][field0]" value="French (FRA)"> French (FRA)</label></li>
+        <li><label><input type="checkbox" name="cards[bbbb2222-cccc-3333-dddd-4444eeee5555][field0]" value="Mandarin (MAN)"> Mandarin (MAN)</label></li>
+        <li><label><input type="checkbox" name="cards[bbbb2222-cccc-3333-dddd-4444eeee5555][field0]" value="Spanish (SPA)"> Spanish (SPA)</label></li>
+      </ul>
+    </div>
+  </li>
+
+  <!-- (5) work-auth labelled name-grouped checkbox group -> MUST be skipped -->
+  <li class="application-question custom-question">
+    <label class="application-label">Which work authorizations do you hold? (check all that apply) *</label>
+    <div class="application-field">
+      <ul>
+        <li><label><input type="checkbox" name="cards[cccc3333-dddd-4444-eeee-5555ffff6666][field0]" value="US Citizen"> US Citizen</label></li>
+        <li><label><input type="checkbox" name="cards[cccc3333-dddd-4444-eeee-5555ffff6666][field0]" value="Authorized to work in the United States"> Authorized to work in the United States</label></li>
+      </ul>
+    </div>
+  </li>
+
+  <!-- (6) id-less free-text essay card: label_for would return name/'Type your response' -->
+  <li class="application-question custom-question">
+    <label class="application-label">Why do you want to work here? *</label>
+    <div class="application-field">
+      <textarea name="cards[deadbeef-0000-1111-2222-333344445555][field0]" required placeholder="Type your response"></textarea>
+    </div>
+  </li>
+
+  <button type="button">Submit application</button>
+</form></body></html>

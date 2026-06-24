@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Ashby posting (no form until "Apply for this Job" clicked)</title></head>
+<body>
+<!-- Mirrors the live Ashby POSTING page: the job description, an "Apply for this Job" CTA,
+     and ZERO form inputs. The form (resume field etc.) only renders after the CTA click. -->
+<div id="root">
+  <h1>Senior Engineer</h1>
+  <p>Ramp is hiring. Read the description, then apply.</p>
+  <button type="button" id="apply_cta">Apply for this Job</button>
+</div>
+<script>
+document.getElementById('apply_cta').addEventListener('click', function(){
+  // Reveal a minimal application form in place (resume field present = form rendered).
+  document.getElementById('root').innerHTML =
+    '<form id="application-form">' +
+    '<label for="_systemfield_name">Name *</label>' +
+    '<input id="_systemfield_name" type="text" required>' +
+    '<label>Resume *</label>' +
+    '<input id="_systemfield_resume" type="file">' +
+    '</form>';
+});
+</script>
+</body></html>

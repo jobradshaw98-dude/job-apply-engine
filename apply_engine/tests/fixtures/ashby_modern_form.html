@@ -1,0 +1,111 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Ashby (modern jobs.ashbyhq.com — button-group Y/N + Upload File)</title></head>
+<body>
+<!-- Faithful-enough double of the LIVE Ashby /application form (Ramp submit 2026-06-08):
+     system fields by id; Yes/No questions are BUTTON GROUPS that mark the selected button
+     with an `_act…` class (no aria-pressed); files attach via a visible "Upload File" button
+     -> native chooser; submitting replaces the form IN PLACE with a success panel (no URL change). -->
+<div id="form_root">
+<form id="application-form">
+  <label for="_systemfield_name">Name *</label>
+  <input id="_systemfield_name" name="_systemfield_name" type="text" required>
+
+  <label for="_systemfield_email">Email *</label>
+  <input id="_systemfield_email" name="_systemfield_email" type="email" required>
+
+  <label for="phone">Phone</label>
+  <input id="phone" name="phone" type="tel">
+
+  <!-- Resume: hidden file input + visible "Upload File" button (required) -->
+  <div class="_fileField">
+    <label>Resume *</label>
+    <input id="_systemfield_resume" type="file" style="display:none">
+    <button type="button" class="_uploadBtn" data-for="_systemfield_resume">Upload File</button>
+  </div>
+
+  <!-- Cover letter: optional file -->
+  <div class="_fileField">
+    <label>Cover Letter</label>
+    <input id="cover_letter" type="file" style="display:none">
+    <button type="button" class="_uploadBtn" data-for="cover_letter">Upload File</button>
+  </div>
+
+  <!-- WORK-AUTH (combined): button-group Yes/No. Owned by the work-auth guard. -->
+  <div class="_fieldEntry ashby-application-form-field-entry">
+    <label class="ashby-application-form-question-title">Are you authorized to work in the United States without requiring sponsorship? *</label>
+    <div class="_yesno" data-group="auth">
+      <button type="button">Yes</button><button type="button">No</button>
+    </div>
+  </div>
+
+  <!-- WORK-AUTH (sponsorship): button-group Yes/No -->
+  <div class="_fieldEntry ashby-application-form-field-entry">
+    <label class="ashby-application-form-question-title">Will you now or in the future require sponsorship for an employment visa? *</label>
+    <div class="_yesno" data-group="sponsor">
+      <button type="button">Yes</button><button type="button">No</button>
+    </div>
+  </div>
+
+  <!-- CUSTOM (non-work-auth) RTO commitment: button-group Yes/No -->
+  <div class="_fieldEntry ashby-application-form-field-entry">
+    <label class="ashby-application-form-question-title">Are you willing to work from our office 3 days per week? *</label>
+    <div class="_yesno" data-group="rto">
+      <button type="button">Yes</button><button type="button">No</button>
+    </div>
+  </div>
+
+  <!-- EEO control (button-group): must NEVER be driven by label-substring -->
+  <div class="_fieldEntry ashby-application-form-field-entry">
+    <label class="ashby-application-form-question-title">Do you identify as a member of an underrepresented gender?</label>
+    <div class="_yesno" data-group="eeo">
+      <button type="button">Yes</button><button type="button">No</button>
+    </div>
+  </div>
+
+  <button id="submit_btn" type="button">Submit Application</button>
+</form>
+</div>
+
+<script>
+// Button-group behavior: clicking a Yes/No button marks it active with a HASHED class that
+// CONTAINS the `_act` stem (live Ashby uses e.g. `_active_h7s2`); de-activates its sibling.
+document.querySelectorAll('._yesno').forEach(function(group){
+  group.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click', function(){
+      group.querySelectorAll('button').forEach(function(x){
+        x.className = (x.className || '').replace(/\b_active_[a-z0-9]+\b/g, '').trim();
+      });
+      b.className = (b.className ? b.className + ' ' : '') + '_active_h7s2';
+    });
+  });
+});
+
+// "Upload File" buttons open the native chooser for their hidden input.
+document.querySelectorAll('._uploadBtn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var inp = document.getElementById(btn.getAttribute('data-for'));
+    if (inp) inp.click();
+  });
+});
+// Show the chosen filename so the engine's "filename visible" check passes.
+['_systemfield_resume','cover_letter'].forEach(function(id){
+  var inp = document.getElementById(id);
+  if (!inp) return;
+  inp.addEventListener('change', function(){
+    if (inp.files && inp.files.length){
+      var span = document.createElement('span');
+      span.className = '_fileName';
+      span.textContent = inp.files[0].name;
+      inp.parentNode.appendChild(span);
+    }
+  });
+});
+
+// Submit replaces the form IN PLACE with a success panel — NO navigation.
+document.getElementById('submit_btn').addEventListener('click', function(){
+  document.getElementById('form_root').innerHTML =
+    '<div class="_successPanel"><h2>Success</h2>' +
+    '<p>Thank you for your interest in Ramp. Your application has been received.</p></div>';
+});
+</script>
+</body></html>

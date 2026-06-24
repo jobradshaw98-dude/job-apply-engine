@@ -1,0 +1,27 @@
+# virtual envs
+.venv/
+venv/
+
+# real user data (never commit — these hold PII/credentials)
+applicant_profile.json
+applicant_credentials.json
+voice_profile.md
+jobs.json
+applications.json
+staged_applications.json
+
+# runtime artifacts
+runs/
+profile/
+docs/img/*.tmp.png
+
+# python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+egg-info/

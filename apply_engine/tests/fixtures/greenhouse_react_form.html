@@ -1,0 +1,40 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Greenhouse (React-Select)</title></head>
+<body>
+<form id="application_form">
+  <input id="first_name" type="text"><input id="last_name" type="text">
+  <input id="email" type="email"><input id="phone" type="tel">
+  <input id="resume" type="file">
+
+  <div class="field-wrapper">
+    <label class="label select__label">Are you legally authorized to work in the United States of America?</label>
+    <div class="select-shell"><div class="select__control" data-rs="auth">Select...</div></div>
+  </div>
+
+  <div class="field-wrapper">
+    <label class="label select__label">Do you now, or will you in the future, require sponsorship for employment-based immigration status?</label>
+    <div class="select-shell"><div class="select__control" data-rs="sponsor">Select...</div></div>
+  </div>
+
+  <button id="submit_app" type="button">Submit Application</button>
+</form>
+<script>
+// Minimal React-Select test double: clicking a .select__control opens a menu of
+// .select__option (Yes/No); clicking an option sets the control's text + data-value.
+document.querySelectorAll('.select__control').forEach(function(ctrl){
+  ctrl.addEventListener('click', function(){
+    document.querySelectorAll('.select__menu').forEach(m=>m.remove());
+    var menu=document.createElement('div'); menu.className='select__menu';
+    ['Yes','No'].forEach(function(t){
+      var o=document.createElement('div'); o.className='select__option'; o.textContent=t;
+      o.addEventListener('click', function(e){
+        e.stopPropagation();
+        ctrl.textContent=t; ctrl.setAttribute('data-value', t);
+        menu.remove();
+      });
+      menu.appendChild(o);
+    });
+    ctrl.parentNode.appendChild(menu);
+  });
+});
+</script>
+</body></html>

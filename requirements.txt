@@ -1,0 +1,7 @@
+playwright==1.49.0
+pytest==8.3.4
+pytest-cov
+anthropic
+pymupdf
+python-pptx
+pywin32; sys_platform == "win32"

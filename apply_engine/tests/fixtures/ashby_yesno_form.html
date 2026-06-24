@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Ashby Yes/No</title></head><body>
+<!-- Mirrors live Ashby work-auth widget: a Yes/No <button> pair inside a field entry -->
+<form>
+  <input id="_systemfield_name" name="_systemfield_name" type="text">
+  <input id="_systemfield_email" name="_systemfield_email" type="email">
+  <input id="_systemfield_resume" type="file">
+  <div class="_fieldEntry ashby-application-form-field-entry">
+    <label class="ashby-application-form-question-title">Will you now or in the future require sponsorship for employment visa status in the United States?</label>
+    <div class="_yesno">
+      <button type="button">Yes</button><button type="button">No</button>
+    </div>
+  </div>
+</form>
+<script>
+document.querySelectorAll('.ashby-application-form-field-entry button').forEach(function(b){
+  b.addEventListener('click', function(){
+    b.parentNode.querySelectorAll('button').forEach(x=>x.removeAttribute('data-selected'));
+    b.setAttribute('data-selected','1');
+  });
+});
+</script>
+</body></html>

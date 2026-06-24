@@ -1,0 +1,116 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Greenhouse (modern — State select keyed by 2-LETTER CODES)</title></head>
+<body>
+<!-- Same as greenhouse_modern_form.html, but the State react-select's options are 2-LETTER
+     CODES ('CA','TX','NY'), NOT full names. This reproduces the silent Oura blocker: filling
+     'California' into this select yields 'No options' and leaves State blank. The engine's
+     [state_full, state] candidate fallback must recover by typing 'CA'. -->
+<form id="application_form">
+  <input id="first_name" type="text"><input id="last_name" type="text">
+  <input id="email" type="email"><input id="phone" type="tel">
+  <input id="resume" type="file">
+
+  <div class="field-wrapper">
+    <label class="label select__label">Country *</label>
+    <div class="select__control" data-rsname="country" data-options="United States|Canada|Mexico">
+      <div class="select__value-container">
+        <div class="select__placeholder">Select...</div>
+        <span class="select__input-container"><input class="select__input" id="question_country" autocomplete="off"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="field-wrapper">
+    <label class="label select__label">State *</label>
+    <div class="select__control" data-rsname="state" data-cascade="country">
+      <div class="select__value-container">
+        <div class="select__placeholder">Select...</div>
+        <span class="select__input-container"><input class="select__input" id="question_state" autocomplete="off"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="field-wrapper">
+    <label class="label select__label">Are you legally authorized to work in the United States of America? *</label>
+    <div class="select__control" data-rsname="auth" data-options="Yes|No">
+      <div class="select__value-container">
+        <div class="select__placeholder">Select...</div>
+        <span class="select__input-container"><input class="select__input" id="question_auth" autocomplete="off"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="field-wrapper">
+    <label class="label select__label">Do you now, or will you in the future, require sponsorship for employment-based immigration status? *</label>
+    <div class="select__control" data-rsname="sponsor" data-options="Yes|No">
+      <div class="select__value-container">
+        <div class="select__placeholder">Select...</div>
+        <span class="select__input-container"><input class="select__input" id="question_sponsor" autocomplete="off"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="field-wrapper">
+    <label class="label select__label">Have you helped develop and validate FEA models? *</label>
+    <div class="select__control" data-rsname="fea" data-options="Yes|No">
+      <div class="select__value-container">
+        <div class="select__placeholder">Select...</div>
+        <span class="select__input-container"><input class="select__input" id="question_fea" autocomplete="off"></span>
+      </div>
+    </div>
+  </div>
+
+  <button id="submit_app" type="button">Submit Application</button>
+</form>
+<script>
+// React-Select double — IDENTICAL to greenhouse_modern_form.html except the State cascade
+// returns 2-LETTER CODES instead of full names. 'California' won't match -> 'No options';
+// 'CA' will.
+function optionsFor(ctrl){
+  if (ctrl.dataset.cascade){
+    var src = document.querySelector('[data-rsname="'+ctrl.dataset.cascade+'"]');
+    var v = src && src.getAttribute('data-value');
+    if (v === 'United States') return ['CA','TX','NY'];
+    return [];
+  }
+  return (ctrl.dataset.options || '').split('|').filter(Boolean);
+}
+function closeMenus(){
+  document.querySelectorAll('.select__menu').forEach(function(m){ m.remove(); });
+}
+function choose(ctrl, t){
+  ctrl.setAttribute('data-value', t);
+  var vc = ctrl.querySelector('.select__value-container');
+  var ph = ctrl.querySelector('.select__placeholder'); if (ph) ph.remove();
+  var sv = ctrl.querySelector('.select__single-value');
+  if (!sv){ sv = document.createElement('div'); sv.className = 'select__single-value'; vc.insertBefore(sv, vc.firstChild); }
+  sv.textContent = t;
+  var input = ctrl.querySelector('input'); if (input) input.value = '';
+  closeMenus();
+}
+function buildMenu(ctrl){
+  closeMenus();
+  var input = ctrl.querySelector('input');
+  var filter = ((input && input.value) || '').toLowerCase();
+  var opts = optionsFor(ctrl).filter(function(o){ return o.toLowerCase().indexOf(filter) > -1; });
+  var menu = document.createElement('div'); menu.className = 'select__menu';
+  if (opts.length === 0){
+    var n = document.createElement('div'); n.className = 'select__menu-notice'; n.textContent = 'No options';
+    menu.appendChild(n);
+  } else {
+    opts.forEach(function(t){
+      var o = document.createElement('div'); o.className = 'select__option'; o.textContent = t;
+      o.addEventListener('mousedown', function(e){ e.preventDefault(); e.stopPropagation(); choose(ctrl, t); });
+      menu.appendChild(o);
+    });
+  }
+  ctrl.parentNode.appendChild(menu);
+}
+document.querySelectorAll('.select__control').forEach(function(ctrl){
+  ctrl.addEventListener('click', function(){ buildMenu(ctrl); });
+  var input = ctrl.querySelector('input');
+  if (input){ input.addEventListener('input', function(){ buildMenu(ctrl); }); }
+});
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeMenus(); });
+</script>
+</body></html>

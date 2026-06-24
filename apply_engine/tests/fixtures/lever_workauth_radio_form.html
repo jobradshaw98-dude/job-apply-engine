@@ -1,0 +1,48 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Lever work-auth radios</title></head><body>
+<!-- Mirrors the LIVE Lever (Palantir) work-authorization card captured 2026-06-02:
+     work-auth is a RADIO Yes/No pair (NOT a <select>, NOT a Yes/No <button> pair), keyed by
+     name="cards[<uuid>][fieldN]" with value="Yes"/"No", each radio wrapped in a <label>Yes/No</label>.
+     The QUESTION text is NOT a <label for=> — it lives in the card's .application-label, recovered
+     by questions._name_group_label. Two questions with OPPOSITE correct answers:
+       field0 "Are you legally authorized to work...?"        -> Yes
+       field1 "Will you now or in the future require sponsorship...?" -> No
+     Plus one NON-work-auth required radio group that must be LEFT for Sam (never auto-answered),
+     and still reported missing by completeness when unanswered. -->
+<form>
+
+  <!-- (1) work-auth: authorized to work -> answer Yes -->
+  <li class="application-question custom-question">
+    <label class="application-label">Are you legally authorized to work in the country for which you are applying? *</label>
+    <div class="application-field">
+      <ul>
+        <li><label><input type="radio" name="cards[1c719ca9-5069-4afe-9e82-39ca420e0edb][field0]" value="Yes" required>Yes</label></li>
+        <li><label><input type="radio" name="cards[1c719ca9-5069-4afe-9e82-39ca420e0edb][field0]" value="No" required>No</label></li>
+      </ul>
+    </div>
+  </li>
+
+  <!-- (2) work-auth: require sponsorship -> answer No -->
+  <li class="application-question custom-question">
+    <label class="application-label">Will you now or in the future require sponsorship for employment visa status (e.g., H-1B, etc.)? *</label>
+    <div class="application-field">
+      <ul>
+        <li><label><input type="radio" name="cards[1c719ca9-5069-4afe-9e82-39ca420e0edb][field1]" value="Yes" required>Yes</label></li>
+        <li><label><input type="radio" name="cards[1c719ca9-5069-4afe-9e82-39ca420e0edb][field1]" value="No" required>No</label></li>
+      </ul>
+    </div>
+  </li>
+
+  <!-- (3) NON-work-auth required radio group: MUST be left for Sam (not auto-answered),
+           and reported missing by completeness while unanswered -->
+  <li class="application-question custom-question">
+    <label class="application-label">Do you currently hold an active security clearance? *</label>
+    <div class="application-field">
+      <ul>
+        <li><label><input type="radio" name="cards[99990000-aaaa-bbbb-cccc-1234567890ab][field0]" value="Yes" required>Yes</label></li>
+        <li><label><input type="radio" name="cards[99990000-aaaa-bbbb-cccc-1234567890ab][field0]" value="No" required>No</label></li>
+      </ul>
+    </div>
+  </li>
+
+</form>
+</body></html>

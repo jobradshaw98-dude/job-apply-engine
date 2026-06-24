@@ -1,0 +1,83 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>G5 — answer-every-field: optionals + EEO</title></head>
+<body>
+<!-- Faithful double for the G5 (answer-every-field) pass. Mixes the widget styles EEO + optional
+     fields appear as in the live runs:
+       * EEO self-ID as NATIVE <select> (classic Greenhouse) — gender / race / hispanic /
+         veteran / disability.
+       * Optional free-text inputs — name pronunciation, earliest start date, deadlines,
+         additional information.
+       * A website field that MUST stay blank (the profile has no url -> never fabricate).
+       * A REQUIRED non-EEO field (first name) that the optional pass must NOT touch.
+     Proves: EEO gets Sam's disclosed values (gender=Male/race=White/hispanic=No/veteran=not-
+     protected) + disability=decline; optional text gets the canned answers; website stays blank;
+     the required field is left exactly as the required-fill path set it. -->
+<form id="application_form">
+  <!-- REQUIRED field — owned by the normal fill path; the optional pass MUST skip it. -->
+  <label for="first_name">First name *</label>
+  <input id="first_name" type="text" required>
+
+  <!-- ===== Optional free-text ===== -->
+  <label for="pronounce">How do you pronounce your name?</label>
+  <input id="pronounce" type="text">
+
+  <label for="start_date">What is your earliest start date?</label>
+  <input id="start_date" type="text">
+
+  <label for="deadlines">Do you have any deadlines or competing offers we should know about?</label>
+  <textarea id="deadlines"></textarea>
+
+  <label for="additional">Is there anything else you'd like us to know? (Additional information)</label>
+  <textarea id="additional"></textarea>
+
+  <!-- Website — MUST stay blank (no url in the profile). -->
+  <label for="website">Personal website</label>
+  <input id="website" type="url">
+
+  <!-- ===== EEO / voluntary self-ID (native selects) ===== -->
+  <label for="eeo_gender">Gender</label>
+  <select id="eeo_gender" name="eeo[gender]">
+    <option value="">Select...</option>
+    <option>Male</option>
+    <option>Female</option>
+    <option>Non-binary</option>
+    <option>Decline to self-identify</option>
+  </select>
+
+  <label for="eeo_race">Race / Ethnicity</label>
+  <select id="eeo_race" name="eeo[race]">
+    <option value="">Select...</option>
+    <option>White</option>
+    <option>Black or African American</option>
+    <option>Asian</option>
+    <option>Two or More Races</option>
+    <option>Decline to self-identify</option>
+  </select>
+
+  <label for="eeo_hispanic">Are you Hispanic or Latino?</label>
+  <select id="eeo_hispanic" name="eeo[hispanic]">
+    <option value="">Select...</option>
+    <option>Yes</option>
+    <option>No</option>
+    <option>Decline to self-identify</option>
+  </select>
+
+  <label for="eeo_veteran">Veteran status</label>
+  <select id="eeo_veteran" name="eeo[veteran]">
+    <option value="">Select...</option>
+    <option>I am not a protected veteran</option>
+    <option>I identify as one or more of the classifications of a protected veteran</option>
+    <option>I do not want to answer</option>
+  </select>
+
+  <label for="eeo_disability">Disability status</label>
+  <select id="eeo_disability" name="eeo[disability]">
+    <option value="">Select...</option>
+    <option>Yes, I have a disability (or previously had a disability)</option>
+    <option>No, I do not have a disability and have not had one in the past</option>
+    <option>I do not want to answer</option>
+  </select>
+
+  <button id="submit_app" type="button">Submit Application</button>
+</form>
+</body></html>

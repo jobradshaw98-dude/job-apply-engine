@@ -1,0 +1,121 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Office-commitment auto-Yes — Ashby button-group + Greenhouse react-select + relocation</title></head>
+<body>
+<!-- Faithful double mixing BOTH widget styles office-commitment questions appear as in the
+     live runs (JOB-227/237/238): Ashby Yes/No BUTTON GROUPS (selected button gets an `_act`
+     class) AND modern Greenhouse REACT-SELECT (.select__control). Includes the CRITICAL
+     relocation question on the SAME form, which must be LEFT UNTOUCHED (escalate), and an EEO
+     button-group that must never be auto-answered. Proves the office Qs get Yes + verified
+     while relocation/EEO are not driven. -->
+<form id="application_form">
+  <input id="first_name" type="text"><input id="email" type="email">
+
+  <!-- (A) Ashby-style BUTTON-GROUP office commitment: "come into the office four days per week" -->
+  <div class="_fieldEntry">
+    <label>Are you able to come into the office four days per week? *</label>
+    <div class="_yesno" data-group="office_days">
+      <button type="button">Yes</button><button type="button">No</button>
+    </div>
+  </div>
+
+  <!-- (B) Ashby-style BUTTON-GROUP hybrid commitment -->
+  <div class="_fieldEntry">
+    <label>Are you comfortable working on-site in a hybrid arrangement? *</label>
+    <div class="_yesno" data-group="hybrid">
+      <button type="button">Yes</button><button type="button">No</button>
+    </div>
+  </div>
+
+  <!-- (C) RELOCATION — button-group, MUST NOT be auto-answered (owned by Sam) -->
+  <div class="_fieldEntry">
+    <label>Are you open to relocation for this role? *</label>
+    <div class="_yesno" data-group="relocation">
+      <button type="button">Yes</button><button type="button">No</button>
+    </div>
+  </div>
+
+  <!-- (D) EEO — button-group, MUST NOT be touched -->
+  <div class="_fieldEntry">
+    <label>Do you identify as a member of an underrepresented gender?</label>
+    <div class="_yesno" data-group="eeo">
+      <button type="button">Yes</button><button type="button">No</button>
+    </div>
+  </div>
+
+  <!-- (E) Greenhouse REACT-SELECT office commitment: "in-person ... 25% of the time" -->
+  <div class="field-wrapper">
+    <label class="label select__label">Are you open to working in-person in one of our offices 25% of the time? *</label>
+    <div class="select__control" data-rsname="inperson" data-options="Yes|No">
+      <div class="select__value-container">
+        <div class="select__placeholder">Select...</div>
+        <span class="select__input-container"><input class="select__input" id="question_inperson" autocomplete="off"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- (F) Greenhouse REACT-SELECT relocation — MUST NOT be driven by the office guard -->
+  <div class="field-wrapper">
+    <label class="label select__label">Are you willing to relocate to Austin for this role? *</label>
+    <div class="select__control" data-rsname="reloc_rs" data-options="Yes|No">
+      <div class="select__value-container">
+        <div class="select__placeholder">Select...</div>
+        <span class="select__input-container"><input class="select__input" id="question_reloc" autocomplete="off"></span>
+      </div>
+    </div>
+  </div>
+
+  <button id="submit_app" type="button">Submit Application</button>
+</form>
+
+<script>
+// --- Ashby button-group behavior: clicking marks the button with a hashed `_act` class. ---
+document.querySelectorAll('._yesno').forEach(function(group){
+  group.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click', function(){
+      group.querySelectorAll('button').forEach(function(x){
+        x.className = (x.className || '').replace(/\b_active_[a-z0-9]+\b/g, '').trim();
+      });
+      b.className = (b.className ? b.className + ' ' : '') + '_active_h7s2';
+    });
+  });
+});
+
+// --- Greenhouse react-select double: filter, choose -> .select__single-value + data-value. ---
+function optionsFor(ctrl){ return (ctrl.dataset.options || '').split('|').filter(Boolean); }
+function closeMenus(){ document.querySelectorAll('.select__menu').forEach(function(m){ m.remove(); }); }
+function choose(ctrl, t){
+  ctrl.setAttribute('data-value', t);
+  var vc = ctrl.querySelector('.select__value-container');
+  var ph = ctrl.querySelector('.select__placeholder'); if (ph) ph.remove();
+  var sv = ctrl.querySelector('.select__single-value');
+  if (!sv){ sv = document.createElement('div'); sv.className = 'select__single-value'; vc.insertBefore(sv, vc.firstChild); }
+  sv.textContent = t;
+  var input = ctrl.querySelector('input'); if (input) input.value = '';
+  closeMenus();
+}
+function buildMenu(ctrl){
+  closeMenus();
+  var input = ctrl.querySelector('input');
+  var filter = ((input && input.value) || '').toLowerCase();
+  var opts = optionsFor(ctrl).filter(function(o){ return o.toLowerCase().indexOf(filter) > -1; });
+  var menu = document.createElement('div'); menu.className = 'select__menu';
+  if (opts.length === 0){
+    var n = document.createElement('div'); n.className = 'select__menu-notice'; n.textContent = 'No options';
+    menu.appendChild(n);
+  } else {
+    opts.forEach(function(t){
+      var o = document.createElement('div'); o.className = 'select__option'; o.textContent = t;
+      o.addEventListener('mousedown', function(e){ e.preventDefault(); e.stopPropagation(); choose(ctrl, t); });
+      menu.appendChild(o);
+    });
+  }
+  ctrl.parentNode.appendChild(menu);
+}
+document.querySelectorAll('.select__control').forEach(function(ctrl){
+  ctrl.addEventListener('click', function(){ buildMenu(ctrl); });
+  var input = ctrl.querySelector('input');
+  if (input){ input.addEventListener('input', function(){ buildMenu(ctrl); }); }
+});
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeMenus(); });
+</script>
+</body></html>

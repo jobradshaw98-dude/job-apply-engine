@@ -1,0 +1,56 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Phase 0 — live-form model fixture (constraints + reconciliation)</title></head>
+<body>
+<!-- Purpose-built for the Phase 0 live-form MODEL (form_spec + reconcile). Exercises:
+     * a textarea with a "200-400 words" word RANGE in helper text  -> constraints {words:[200,400]}
+     * a textarea with maxlength=500 (no copy)                       -> constraints {chars_max:500}
+     * a textarea with neither                                       -> constraints {}
+     * a SHORT text "Current employer" field (the 253-char-narrative-into-employer mismatch case)
+     * a required native <select>
+     * a resume file field + a cover file field (G7: WITH-cover form)
+     * a required field with NO staged answer (unfilled_required_live) -> "Current title". -->
+<form id="application_form">
+  <label for="first_name">First Name *</label>
+  <input id="first_name" name="first_name" type="text" required>
+  <label for="email">Email *</label>
+  <input id="email" name="email" type="email" required>
+
+  <!-- SHORT text field — a long staged narrative here is a SHAPE mismatch. -->
+  <label for="employer">Current employer *</label>
+  <input id="employer" name="employer" type="text" required>
+
+  <!-- required SHORT field nothing is staged for -> unfilled_required_live -->
+  <label for="title">Current title *</label>
+  <input id="title" name="title" type="text" required>
+
+  <!-- essay WITH a stated word range in helper copy -->
+  <label for="why">Why do you want to work here? *</label>
+  <textarea id="why" name="why" required></textarea>
+  <div id="why_help" class="field-description">Please answer in 200-400 words.</div>
+
+  <!-- essay WITH a maxlength attr (char cap), no helper copy -->
+  <label for="short_essay">Describe a project *</label>
+  <textarea id="short_essay" name="short_essay" required maxlength="500"></textarea>
+
+  <!-- essay with NEITHER a range NOR a maxlength -> empty constraints -->
+  <label for="open_essay">Anything else?</label>
+  <textarea id="open_essay" name="open_essay"></textarea>
+
+  <!-- required custom native select -->
+  <label for="exp">Years of simulation experience? *</label>
+  <select id="exp" name="exp" required>
+    <option value="">Select...</option>
+    <option value="a">0-2 years</option>
+    <option value="b">3-5 years</option>
+    <option value="c">5+ years</option>
+  </select>
+
+  <!-- resume + cover upload fields (WITH-cover form, G7) -->
+  <label for="resume">Resume/CV *</label>
+  <input id="resume" name="resume" type="file" required>
+  <label for="cover">Cover Letter</label>
+  <input id="cover" name="cover" type="file">
+
+  <button id="submit_app" type="button">Submit Application</button>
+</form>
+</body></html>

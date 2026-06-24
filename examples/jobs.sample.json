@@ -1,0 +1,14 @@
+[
+  {
+    "id": "JOB-001",
+    "title": "Forward Deployed Engineer",
+    "role": "Forward Deployed Engineer",
+    "company": "Globex",
+    "employer": "Globex",
+    "location": "Remote (US)",
+    "url": "https://example.com/careers/forward-deployed-engineer",
+    "apply_url": "https://boards.greenhouse.io/example/jobs/0000001",
+    "jd_text": "Globex is hiring a Forward Deployed Engineer to work directly with customers, turning their hardest problems into shipped software. You will scope solutions on-site, build prototypes fast, and bring them to production with our core teams. We look for engineers who are comfortable across the stack, communicate clearly with non-technical stakeholders, and own outcomes end to end. Bonus: experience automating analysis workflows, working with LLM tooling, or bridging simulation/data and product. This is a generic sample posting included with job-apply-engine so you can run a dry-run end to end. Replace it with a real job you are applying to.",
+    "notes": "Sample job shipped with the repo. Safe to dry-run against. Replace with a real posting."
+  }
+]

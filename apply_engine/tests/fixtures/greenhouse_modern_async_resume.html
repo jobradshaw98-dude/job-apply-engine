@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Modern Greenhouse — async resume render</title></head>
+<body>
+  <!--
+    Reproduces modern job-boards.greenhouse.io resume upload (verified live on Anthropic
+    2026-06-08): a visually-hidden <input id="resume" type="file"> + a visible "Attach"
+    button, and on change the filename is rendered ASYNCHRONOUSLY (~1500ms) into a
+    <p class="body body__secondary">. The old fixed 1200ms wait fired BEFORE this render and
+    reported a real upload as "did not attach"; the polling fix must catch it.
+  -->
+  <h1>Forward Deployed Engineer</h1>
+  <div class="upload-field">
+    <div class="label upload-label" id="upload-label-resume">Resume/CV</div>
+    <button type="button" class="btn btn--rounded" id="attach_btn">Attach</button>
+    <label class="visually-hidden" for="resume">Attach</label>
+    <input id="resume" type="file" class="visually-hidden"
+           accept=".pdf,.doc,.docx,.txt,.rtf" />
+    <div id="resume-filename"></div>
+  </div>
+
+  <script>
+    var inp = document.getElementById('resume');
+    // The visible button forwards to the hidden input, like modern GH.
+    document.getElementById('attach_btn').addEventListener('click', function () {
+      inp.click();
+    });
+    // KEY: render the filename only AFTER a delay > the old fixed wait, to prove the poll.
+    inp.addEventListener('change', function () {
+      var name = (inp.files && inp.files[0]) ? inp.files[0].name : '';
+      if (!name) return;
+      setTimeout(function () {
+        var p = document.createElement('p');
+        p.className = 'body body__secondary';
+        p.textContent = name;
+        document.getElementById('resume-filename').appendChild(p);
+      }, 1500);
+    });
+  </script>
+</body>
+</html>

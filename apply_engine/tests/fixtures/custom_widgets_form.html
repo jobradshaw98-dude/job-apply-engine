@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Custom widgets form</title></head><body>
+<!-- Mirrors a Lever-style single-page form with custom <select> "cards" questions
+     and a "check all that apply" checkbox-group, plus a standard select and a
+     work-auth select that the new extractors must SKIP. -->
+<form>
+  <!-- (1) custom required <select> the field map does NOT cover -> should be extracted -->
+  <label for="exp">Years of simulation experience? *</label>
+  <select id="exp" required>
+    <option value="">Select</option>
+    <option value="a">0-2 years</option>
+    <option value="b">3-5 years</option>
+    <option value="c">5+ years</option>
+  </select>
+
+  <!-- (2) standard-mapped select (Country) -> must be SKIPPED (map_field handles it) -->
+  <label for="country">Country *</label>
+  <select id="country" required>
+    <option value="">Select</option>
+    <option value="us">United States</option>
+    <option value="ca">Canada</option>
+  </select>
+
+  <!-- (3) work-auth select -> must be SKIPPED (work-auth guard owns it) -->
+  <label for="wa">Are you authorized to work in the United States? *</label>
+  <select id="wa" required>
+    <option value="">Select</option>
+    <option value="yes">Yes</option>
+    <option value="no">No</option>
+  </select>
+
+  <!-- (4) non-required custom select -> SKIPPED (only required ones) -->
+  <label for="opt">Favorite color</label>
+  <select id="opt">
+    <option value="">Select</option>
+    <option value="r">Red</option>
+    <option value="g">Green</option>
+  </select>
+
+  <!-- (5) a checkbox-group "check all that apply" -> should be extracted as ONE group -->
+  <fieldset id="langs" class="required">
+    <legend>Language Skill(s) (check all that apply) *</legend>
+    <label><input type="checkbox" name="lang" value="eng"> English (ENG)</label>
+    <label><input type="checkbox" name="lang" value="fra"> French (FRA)</label>
+    <label><input type="checkbox" name="lang" value="man"> Mandarin (MAN)</label>
+    <label><input type="checkbox" name="lang" value="spa"> Spanish (SPA)</label>
+  </fieldset>
+
+  <button type="button">Submit</button>
+</form></body></html>
