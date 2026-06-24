@@ -23,8 +23,11 @@ dependencies = [
 test = ["pytest>=8", "pytest-cov"]
 
 [project.scripts]
-apply-engine = "apply_engine.cli:main"
+apply-engine = "apply_engine._entry:main"
 
 [tool.setuptools.packages.find]
 include = ["apply_engine*"]
 exclude = ["apply_engine.tests*"]
+
+[tool.setuptools.package-data]
+apply_engine = ["builder/templates/*.html"]

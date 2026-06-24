@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{NAME}} — Resume</title>
+<style>
+  :root {
+    /* ── Tuning knobs ── */
+    --body-font: 9.5pt;
+    --bullet-font: 9.2pt;
+    --name-font: 18pt;
+    --contact-font: 8.8pt;
+    --headline-font: 8.8pt;
+    --summary-font: 9.5pt;
+    --section-header-font: 9.5pt;
+    --role-title-font: 9.5pt;
+    --role-loc-font: 8.2pt;
+    --role-date-font: 8.8pt;
+    --edu-degree-font: 9.5pt;
+    --edu-school-font: 8.2pt;
+    --skill-font: 9pt;
+
+    --section-gap: 10px;
+    --role-gap: 5px;
+    --bullet-gap: 2px;
+    --summary-gap: 8px;
+    --edu-gap: 4px;
+    --skill-gap: 3px;
+
+    --page-margin-tb: 0.55in;
+    --page-margin-lr: 0.75in;
+    --line-height: 1.42;
+    --bullet-indent: 12px;
+  }
+
+  @page {
+    size: letter;
+    margin: var(--page-margin-tb) var(--page-margin-lr);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Calibri', 'Segoe UI', 'Carlito', Arial, sans-serif;
+    font-size: var(--body-font);
+    color: #1a1a1a;
+    line-height: var(--line-height);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── HEADER ── */
+  .header { text-align: center; margin-bottom: 4px; }
+  .name {
+    font-size: var(--name-font);
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #2b5797;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .contact {
+    font-size: var(--contact-font);
+    color: #444;
+    margin-bottom: 2px;
+  }
+  .headline {
+    font-size: var(--headline-font);
+    font-weight: 700;
+    color: #333;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+  .header-rule {
+    border: none;
+    border-top: 2px solid #2b5797;
+    margin: 0 0 5px 0;
+  }
+
+  /* ── SUMMARY ── */
+  .summary {
+    font-size: var(--summary-font);
+    color: #222;
+    line-height: 1.4;
+    margin-bottom: var(--summary-gap);
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    font-size: var(--section-header-font);
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #2b5797;
+    letter-spacing: 0.7px;
+    border-bottom: 1.5px solid #2b5797;
+    padding-bottom: 1px;
+    margin-top: var(--section-gap);
+    margin-bottom: 4px;
+  }
+
+  /* ── ROLES ── */
+  .role-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: var(--role-gap);
+    margin-bottom: 1px;
+  }
+  .role-left { flex: 1; }
+  .role-title {
+    font-size: var(--role-title-font);
+    font-weight: 600;
+    color: #111;
+  }
+  .role-loc {
+    font-size: var(--role-loc-font);
+    color: #666;
+    font-style: italic;
+  }
+  .role-date {
+    font-size: var(--role-date-font);
+    color: #444;
+    white-space: nowrap;
+    margin-left: 8px;
+    flex-shrink: 0;
+  }
+
+  /* ── BULLETS ── */
+  ul.bl {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  ul.bl li {
+    font-size: var(--bullet-font);
+    color: #222;
+    line-height: 1.35;
+    padding-left: var(--bullet-indent);
+    position: relative;
+    margin-bottom: var(--bullet-gap);
+  }
+  ul.bl li::before {
+    content: '\2022';
+    position: absolute;
+    left: 2px;
+    color: #555;
+    font-size: 7.5pt;
+  }
+
+  /* ── EDUCATION ── */
+  .edu-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: var(--edu-gap);
+    margin-bottom: 0;
+  }
+  .edu-degree {
+    font-size: var(--edu-degree-font);
+    font-weight: 700;
+    color: #111;
+    flex: 1;
+  }
+  .edu-date {
+    font-size: var(--role-date-font);
+    color: #444;
+    white-space: nowrap;
+    margin-left: 8px;
+    flex-shrink: 0;
+  }
+  .edu-school {
+    font-size: var(--edu-school-font);
+    color: #666;
+    font-style: italic;
+    margin-bottom: 1px;
+  }
+  .edu-detail {
+    font-size: var(--edu-school-font);
+    color: #444;
+    font-style: italic;
+    margin-bottom: 3px;
+    padding-left: 1px;
+  }
+
+  /* ── SKILLS ── */
+  .skill-row {
+    font-size: var(--skill-font);
+    color: #222;
+    line-height: 1.4;
+    margin-bottom: var(--skill-gap);
+  }
+  .skill-label {
+    font-weight: 700;
+    color: #111;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="name">{{NAME}}</div>
+  <div class="contact">{{CONTACT_LINE}}</div>
+  <div class="headline">{{HEADLINE}}</div>
+</div>
+<hr class="header-rule">
+
+<div class="summary">{{SUMMARY}}</div>
+
+<div class="section-header">Professional Experience</div>
+
+{{EXPERIENCE_BLOCKS}}
+
+<div class="section-header">Education</div>
+
+{{EDUCATION_BLOCKS}}
+
+<div class="section-header">Skills &amp; Expertise</div>
+
+{{SKILLS_BLOCKS}}
+
+</body>
+</html>

@@ -6,9 +6,13 @@ venv/
 applicant_profile.json
 applicant_credentials.json
 voice_profile.md
+narrative.md
 jobs.json
 applications.json
 staged_applications.json
+apply_engine/builder/profile.json
+apply_engine/corpus/
+out/
 
 # runtime artifacts
 runs/

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{NAME}} — Cover Letter</title>
+<style>
+  :root {
+    --body-font: 10.5pt;
+    --name-font: 16pt;
+    --contact-font: 9pt;
+    --date-font: 10pt;
+    --addressee-font: 10pt;
+    --salutation-font: 10.5pt;
+    --close-font: 10.5pt;
+    --page-margin-tb: 0.75in;
+    --page-margin-lr: 1in;
+    --line-height: 1.5;
+    --para-gap: 10px;
+  }
+
+  @page {
+    size: letter;
+    margin: var(--page-margin-tb) var(--page-margin-lr);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Calibri', 'Segoe UI', 'Carlito', Arial, sans-serif;
+    font-size: var(--body-font);
+    color: #1a1a1a;
+    line-height: var(--line-height);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── HEADER ── */
+  .header { margin-bottom: 18px; }
+  .name {
+    font-size: var(--name-font);
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #2b5797;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .contact {
+    font-size: var(--contact-font);
+    color: #444;
+  }
+  .header-rule {
+    border: none;
+    border-top: 2px solid #2b5797;
+    margin: 8px 0 16px 0;
+  }
+
+  /* ── ADDRESSEE BLOCK ── */
+  .date {
+    font-size: var(--date-font);
+    color: #333;
+    margin-bottom: 12px;
+  }
+  .addressee {
+    font-size: var(--addressee-font);
+    color: #333;
+    line-height: 1.45;
+    margin-bottom: 14px;
+  }
+
+  /* ── SALUTATION ── */
+  .salutation {
+    font-size: var(--salutation-font);
+    margin-bottom: var(--para-gap);
+  }
+
+  /* ── BODY PARAGRAPHS ── */
+  .para {
+    font-size: var(--body-font);
+    line-height: var(--line-height);
+    margin-bottom: var(--para-gap);
+    color: #1a1a1a;
+  }
+
+  /* ── CLOSE ── */
+  .close {
+    font-size: var(--close-font);
+    margin-top: 6px;
+    line-height: 1.8;
+  }
+  .signature {
+    font-size: var(--close-font);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="name">{{NAME}}</div>
+  <div class="contact">{{CONTACT_LINE}}</div>
+</div>
+<hr class="header-rule">
+
+<div class="date">{{DATE}}</div>
+
+<div class="addressee">
+{{ADDRESSEE}}
+</div>
+
+<div class="salutation">{{SALUTATION}}</div>
+
+<div class="para">{{PARA1}}</div>
+
+<div class="para">{{PARA2}}</div>
+
+<div class="para">{{PARA3}}</div>
+
+<div class="para">{{PARA4}}</div>
+
+<div class="close">
+Sincerely,<br>
+<span class="signature">{{NAME}}</span>
+</div>
+
+</body>
+</html>

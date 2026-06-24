@@ -1,0 +1,70 @@
+{
+  "_comment": "Your structured career facts. The builder drafts a tailored resume + cover letter FROM this — it never invents anything not here. Copy to apply_engine/builder/profile.json (git-ignored) and replace with your own. Every bullet should be a true, specific fact; the LLM selects and rephrases them to fit each job, it does not fabricate.",
+  "identity": {
+    "name": "Sam Rivera",
+    "email": "sam.rivera@example.com",
+    "phone": "555-555-0100",
+    "location": "Austin, TX",
+    "links": {
+      "linkedin": "https://www.linkedin.com/in/example-sam-rivera",
+      "github": "https://github.com/example-sam",
+      "website": ""
+    }
+  },
+  "headline": "Mechanical / Simulation Engineer — AI-native automation",
+  "summary_facts": [
+    "Engineer who pairs deep simulation/optimization expertise with AI-native software delivery.",
+    "Ships production automation by directing LLM coding harnesses; owns architecture through operation.",
+    "Generalist strength: connecting physics, optimization, data, and product."
+  ],
+  "work_history": [
+    {
+      "company": "Meridian",
+      "role": "R&D Product Development Engineer",
+      "location": "Austin, TX",
+      "start": "2022",
+      "end": "Present",
+      "bullets": [
+        "Built and rolled out 5 internal automation tools (test pipeline, root-cause agent, multi-objective optimizer, report generation, enablement frameworks), cutting routine analysis from days to minutes.",
+        "Led finite-element simulation (LS-DYNA, HyperWorks) and design-of-experiments optimization for new product development.",
+        "Correlated simulation against physical test data to validate models and de-risk design decisions before tooling.",
+        "Championed AI-orchestrated engineering across the R&D team; authored enablement docs adopted by peers."
+      ]
+    },
+    {
+      "company": "Helix Robotics",
+      "role": "Simulation Engineering Intern",
+      "location": "Remote",
+      "start": "2021",
+      "end": "2022",
+      "bullets": [
+        "Developed FEA workflows (ANSYS) for load-bearing components and automated post-processing of result files.",
+        "Reduced a manual stress-report process to an automated pipeline, saving ~50% of analysis time."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "M.A.Sc., Mechanical Engineering",
+      "school": "State University",
+      "location": "Austin, TX",
+      "year": "2022",
+      "detail": "Thesis on surface texturing of load-bearing polymer components; FEA-to-experiment correlation."
+    },
+    {
+      "degree": "B.Eng., Mechanical Engineering",
+      "school": "State University",
+      "location": "Austin, TX",
+      "year": "2020",
+      "detail": ""
+    }
+  ],
+  "skills": {
+    "Simulation & analysis": ["LS-DYNA", "HyperWorks", "ANSYS", "FEA", "design of experiments", "optimization"],
+    "AI-native engineering": ["Claude Code / Codex orchestration", "Python (AI-implemented)", "agent & prompt design", "automation pipelines"],
+    "Domains": ["product development", "test-to-simulation correlation", "root-cause analysis"]
+  },
+  "goals": "Forward-deployed / applied-AI or product-engineering roles where domain depth meets shipping real AI systems.",
+  "interests": "Agentic tooling, engineering simulation + AI, and turning manual analysis into automated systems.",
+  "personal_thread": "Lifelong competitor; engineering is how I compete now. I learn by shipping the thing I need before anyone assigns it."
+}
