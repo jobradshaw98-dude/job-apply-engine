@@ -1,7 +1,7 @@
 # job-apply-engine
 
 [![CI](https://github.com/jobradshaw98-dude/job-apply-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jobradshaw98-dude/job-apply-engine/actions/workflows/ci.yml)
-&nbsp;**1,070 tests** · offline suite · no API key needed
+&nbsp;**953 offline tests** · no API key, network, or browser needed
 
 A job-application toolkit that does two things from your own structured profile:
 
@@ -128,18 +128,25 @@ recoverable, and concurrent runs are merge-safe.
 
 ## Test suite
 
-**1,070 tests passing**, offline — no API key, network, or browser needed (the suite parses HTML
-fixtures of real ATS forms and injects the LLM call):
+**953 tests passing offline** — no API key, network, or browser needed (the suite parses HTML
+fixtures of real ATS forms and fakes the LLM call):
 
 ```bash
 .venv/Scripts/python.exe -m pytest -q
 .venv/Scripts/python.exe -m pytest --cov=apply_engine -q   # with coverage
 ```
 
+The default run is the offline suite. Two opt-in groups are deselected by `pytest.ini` and require
+host resources CI doesn't have, so they're not part of the offline count:
+
+- **117 browser tests** (`-m browser`) drive a live Chromium-family browser; run them on a host with
+  a browser via `pytest -m browser`.
+- **15 LLM tests** (`-m llm`) shell out to the real `claude` CLI; run them with `pytest -m llm`.
+
 `requirements.txt` marks `pywin32` (a Windows-only dependency) with an environment marker, so
 install works on macOS/Linux too. A handful of tests depend on modules that live in a separate
 private repo and are intentionally not published; they're skipped via `pytest.ini`, which documents
-exactly which and why. CI runs the suite on Python 3.11 + 3.12 on every push.
+exactly which and why. CI runs the offline suite on Python 3.11 + 3.12 on every push.
 
 ## Layout
 

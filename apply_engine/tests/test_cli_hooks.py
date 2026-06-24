@@ -117,7 +117,11 @@ def test_build_hooks_off_by_default():
 
 def test_build_hooks_on_wires_llm(monkeypatch):
     import apply_engine.llm as llm
-    monkeypatch.setattr(llm, "make_claude_llm", lambda *a, **k: (lambda p: "drafted"))
+    # build_hooks() constructs the drafter via make_single_call_agent (the single-call engine),
+    # NOT make_claude_llm. Patch the factory it ACTUALLY calls so no real `claude` CLI is required
+    # (on CI there is none) and the construction succeeds. make_audit_fn is patched too because the
+    # real one imports the private, unshipped audit_gate sibling module.
+    monkeypatch.setattr(llm, "make_single_call_agent", lambda *a, **k: (lambda p: "drafted"))
     monkeypatch.setattr(llm, "make_audit_fn", lambda: (lambda t: []))
     monkeypatch.setattr(llm, "load_facts", lambda job, **k: "FACTS:" + job["id"])
 
