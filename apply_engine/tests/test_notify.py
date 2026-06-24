@@ -80,7 +80,7 @@ def test_open_blocker_sends_exactly_once_correct_format():
     assert len(rec_sender.calls) == 1, "exactly ONE message per event"
     call = rec_sender.calls[0]
     assert call["token"] == "TOKEN-123"
-    assert call["params"]["chat_id"] == "8698619324"
+    assert call["params"]["chat_id"] == notify._CHAT_ID
     text = call["params"]["text"]
     assert text.startswith("⏸ Apply HALT — Acme Corp Applied AI Engineer:")
     assert "Are you authorized to work in the US?" in text

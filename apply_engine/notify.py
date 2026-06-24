@@ -18,14 +18,15 @@ HARD Telegram rules (MEMORY.md + scheduled-task convention), all enforced here:
 The real network send is injectable via `send_fn` so tests NEVER hit the Telegram API.
 """
 import json
+import os
 import urllib.parse
 import urllib.request
 
 from . import config
 
-# the user's Telegram chat_id (MEMORY.md / global CLAUDE.md). The bot token is read from
-# brief_config.json (key `telegram_bot_token`); the chat_id is a stable constant.
-_CHAT_ID = "8698619324"
+# Recipient Telegram chat id. Set TELEGRAM_CHAT_ID in your environment; the bot token is read
+# from brief_config.json (key `telegram_bot_token`).
+_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 # The brief_config.json key holding the bot token (verified present 2026-06-11). If this key is
 # absent we fail closed (no send, return False) rather than guess an endpoint.
 _TOKEN_KEY = "telegram_bot_token"
@@ -138,7 +139,6 @@ def mark_notified(manifest_path, job_id: str) -> None:
 
     Fully forgiving: a missing/corrupt manifest, an unknown job_id, or a record with no blocker is
     a silent no-op (never raises). Call this ONLY after notify_blocker returned True."""
-    import os
     from pathlib import Path
 
     from .filemutex import locked
