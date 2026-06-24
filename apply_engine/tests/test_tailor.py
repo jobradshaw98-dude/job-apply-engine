@@ -10,6 +10,22 @@ import pytest
 from apply_engine import config, tailor
 
 
+@pytest.fixture(autouse=True)
+def _seed_master_resume(tmp_path, monkeypatch):
+    """Tailoring loads master_resume.md from the data hub. That file is user data and is NOT
+    present in CI or a fresh clone, so seed a stub and re-point the import-bound RESUME constant
+    at it — this keeps these tests hermetic (they previously passed only because the author's
+    machine happened to have a real master_resume.md on ARIA_CORE_DATA). The llm is faked, so the
+    content is irrelevant; it only has to be non-empty."""
+    mr = tmp_path / "master_resume.md"
+    mr.write_text(
+        "# Master Resume (test stub)\n\n"
+        "Simulation engineer with FEA, LS-DYNA, HyperWorks and design-optimization experience; "
+        "test-to-simulation correlation; Python automation via AI coding harnesses.\n",
+        encoding="utf-8")
+    monkeypatch.setattr(tailor, "RESUME", mr)
+
+
 # A long-enough JD to clear the MIN_JD_CHARS gate.
 GOOD_JD = (
     "We are hiring a Staff FEA Engineer to own structural simulation for a wearable device. "
