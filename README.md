@@ -157,7 +157,7 @@ exactly which and why. CI runs the suite on Python 3.11 + 3.12 on every push.
 
 Built by **Jordan Bradshaw** — an R&D / simulation engineer (FEA, design optimization) who builds
 multi-agent AI systems that do real work autonomously. This is the "ships real, tested product" tool
-from a broader personal multi-agent system, [ARIA](https://github.com/jobradshaw98-dude/aria).
+from a broader personal multi-agent system, [ARIA](https://github.com/jobradshaw98-dude/aria-fleet).
 
 *(The sample applicant "Sam Rivera" throughout the examples is fictional — see the note at the top.)*
 
