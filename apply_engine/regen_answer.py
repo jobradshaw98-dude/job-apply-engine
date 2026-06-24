@@ -107,9 +107,9 @@ def _merge_write(manifest, job_id, mutate_fn, qkey=None):
         return result
 
 
-# corrections_log lives at the career ROOT (one level above this package). These scripts run
-# with cwd = ~/projects/career so a bare import resolves; guard it anyway so a missing/broken
-# ledger module can never stop an answer edit from being saved.
+# corrections_log, if present, lives at the repo root (one level above this package) and resolves
+# by bare import when cwd is the repo root. It is NOT shipped in this public repo, so the import is
+# guarded — a missing/broken ledger module can never stop an answer edit from being saved.
 try:  # pragma: no cover - import wiring
     import corrections_log as _corrections_log
 except Exception:  # noqa: BLE001

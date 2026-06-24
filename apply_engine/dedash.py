@@ -24,9 +24,9 @@ safety net if a rewrite somehow keeps too many.
 
 This module does NOT run automatically. Invoke it explicitly:
 
-    cd ~/projects/career
-    apply_engine\.venv\Scripts\python.exe -m apply_engine.dedash            # all staged apps
-    apply_engine\.venv\Scripts\python.exe -m apply_engine.dedash JOB-131    # one app
+    cd job-apply-engine
+    .venv/Scripts/python.exe -m apply_engine.dedash            # all staged apps
+    .venv/Scripts/python.exe -m apply_engine.dedash JOB-131    # one app
 
 It prints a per-answer before/after em-dash count and a final summary.
 """

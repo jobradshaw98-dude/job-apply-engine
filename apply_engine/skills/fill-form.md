@@ -94,7 +94,7 @@ shapes and fails loud if you pass the wrong type.
 Write a JSON file of the result, then run it through the engine venv:
 
 ```bash
-~/projects/career/apply_engine/.venv/Scripts/python.exe -m apply_engine.form_driver_stage --json /tmp/result.json
+.venv/Scripts/python.exe -m apply_engine.form_driver_stage --json /tmp/result.json
 ```
 
 The JSON uses these exact shapes (mirrors what the deterministic engine writes):
