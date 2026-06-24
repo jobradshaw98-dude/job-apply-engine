@@ -3,7 +3,7 @@
 
 WHY THIS EXISTS
 A ledger-grounded regeneration can "converge" to an essay that is TRUTHFUL but POLICY-VIOLATING:
-it volunteers Sam's visa/citizenship/sponsorship/green-card status in FREE-TEXT application
+it volunteers the applicant's visa/citizenship/sponsorship/green-card status in FREE-TEXT application
 content. The accuracy/fabrication gate cannot catch this — the statement is factually true, so the
 ledger judge passes it. The hard policy (memory: feedback_work_auth_answer_policy,
 user_visa_status, user_marriage_july_2026) is: NEVER volunteer immigration status in application
@@ -49,7 +49,7 @@ DISCLOSURE_FIX = (
     "is handled only in the structured screening fields"
 )
 
-# First-person markers. A disclosure is Sam SPEAKING ABOUT HIMSELF — "I am on a TN visa",
+# First-person markers. A disclosure is the applicant SPEAKING ABOUT THEMSELVES — "I am on a TN visa",
 # "my green card", "I require sponsorship". An employer's third-person policy text ("the company
 # does not sponsor visas") or a neutral term ("citizen science") is NOT a self-disclosure.
 _FP = r"(?:\bI\b|\bI'm\b|\bmy\b|\bmine\b|\bme\b|\bI've\b)"

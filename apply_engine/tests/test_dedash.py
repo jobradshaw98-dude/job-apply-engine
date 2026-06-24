@@ -5,7 +5,7 @@ dedash walks the staged manifest and, for every AI-drafted answer with > 1 em-da
 regen_answer minimal-edit path to reduce them. Proven here against a tmp manifest with a MOCKED
 LLM (no claude CLI, no API):
   1. An over-dashed drafted answer is edited; its em-dash count drops; status stays drafted.
-  2. A Sam-provided answer (answered_by=sam) is NEVER touched, even if over-dashed.
+  2. A user-provided answer (answered_by=sam) is NEVER touched, even if over-dashed.
   3. A one-em-dash answer is left alone (not a candidate).
   4. A submitted record is skipped entirely.
   5. The summary counts reflect what happened.
@@ -30,7 +30,7 @@ def _seed(tmp_path):
                 # over-dashed AI draft -> should be edited
                 {"q": "Why us?", "kind": "essay", "status": "drafted",
                  "value": "I build — I ship — I learn — daily.", "reason": ""},
-                # Sam's own over-dashed answer -> must NEVER be touched
+                # the user's own over-dashed answer -> must NEVER be touched
                 {"q": "Constraint?", "kind": "short_text", "status": "drafted",
                  "answered_by": "sam",
                  "value": "No — none — at all.", "reason": ""},
@@ -103,7 +103,7 @@ def test_dedash_edits_overdashed_skips_sam_and_submitted(tmp_path, monkeypatch, 
     assert why["value"].count("—") == 0
     assert why["status"] == "drafted"
 
-    # 2. Sam's answer is untouched (still has its em-dashes, still answered_by sam).
+    # 2. The user's answer is untouched (still has its em-dashes, still answered_by sam).
     mine = _q(mp, "JOB-900", "Constraint?")
     assert mine["value"] == "No — none — at all."
     assert mine["answered_by"] == "sam"

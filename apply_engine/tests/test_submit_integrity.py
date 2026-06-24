@@ -40,21 +40,21 @@ class _CfgStub:
 @pytest.fixture()
 def career_tree(tmp_path):
     """Build a throwaway career tree:
-        <root>/Sam_Rivera_Resume_Master.pdf        (the master — must NEVER be the attach)
+        <root>/APPLICANT_Resume_Master.pdf        (the master — must NEVER be the attach)
         <root>/apply_engine/                            (PKG_DIR)
-        <root>/applications/APP-001-Acme/SAM_RIVERA_Resume.pdf   (a real tailored resume)
-        <root>/applications/APP-001-Acme/SAM_RIVERA_Cover_Letter.pdf
+        <root>/applications/APP-001-Acme/APPLICANT_Resume.pdf   (a real tailored resume)
+        <root>/applications/APP-001-Acme/APPLICANT_Cover_Letter.pdf
     Returns (cfg, paths-dict)."""
     root = tmp_path / "career"
     pkg = root / "apply_engine"
     pkg.mkdir(parents=True)
-    master = root / "Sam_Rivera_Resume_Master.pdf"
+    master = root / "APPLICANT_Resume_Master.pdf"
     master.write_text("MASTER", encoding="utf-8")
     appdir = root / "applications" / "APP-001-Acme"
     appdir.mkdir(parents=True)
-    tailored_resume = appdir / "SAM_RIVERA_Resume.pdf"
+    tailored_resume = appdir / "APPLICANT_Resume.pdf"
     tailored_resume.write_text("TAILORED", encoding="utf-8")
-    tailored_cover = appdir / "SAM_RIVERA_Cover_Letter.pdf"
+    tailored_cover = appdir / "APPLICANT_Cover_Letter.pdf"
     tailored_cover.write_text("COVER", encoding="utf-8")
     cfg = _CfgStub(pkg)
     return cfg, {
@@ -74,9 +74,9 @@ def _valid_record(paths, **over):
         "submitted": False,
         "uploaded_docs": [
             {"doc": "resume", "path": str(paths["tailored_resume"]),
-             "name": "SAM_RIVERA_Resume.pdf"},
+             "name": "APPLICANT_Resume.pdf"},
             {"doc": "cover", "path": str(paths["tailored_cover"]),
-             "name": "SAM_RIVERA_Cover_Letter.pdf"},
+             "name": "APPLICANT_Cover_Letter.pdf"},
         ],
         "work_auth": [{"field": "sponsor", "answer": "No"}],
         "custom_qs": [],
@@ -108,7 +108,7 @@ def test_master_resume_in_uploaded_docs_is_not_submittable(career_tree):
     rec = _valid_record(paths)
     rec["uploaded_docs"] = [
         {"doc": "resume", "path": str(paths["master"]),
-         "name": "Sam_Rivera_Resume_Master.pdf"},
+         "name": "APPLICANT_Resume_Master.pdf"},
     ]
     ok, reasons = verify_submittable(rec, cfg)
     assert ok is False
@@ -229,7 +229,7 @@ def test_all_reasons_collected_not_just_first(career_tree):
     cfg, paths = career_tree
     rec = _valid_record(paths, work_auth=[{"field": "sponsor", "answer": "Yes"}])
     rec["uploaded_docs"] = [{"doc": "resume", "path": str(paths["master"]),
-                             "name": "Sam_Rivera_Resume_Master.pdf"}]
+                             "name": "APPLICANT_Resume_Master.pdf"}]
     ok, reasons = verify_submittable(rec, cfg)
     assert ok is False
     blob = " ".join(reasons).lower()
@@ -272,7 +272,7 @@ def test_resolve_pdfs_never_returns_master(career_tree):
     cfg, paths = career_tree
     rec = _valid_record(paths)
     rec["uploaded_docs"] = [{"doc": "resume", "path": str(paths["master"]),
-                             "name": "Sam_Rivera_Resume_Master.pdf"}]
+                             "name": "APPLICANT_Resume_Master.pdf"}]
     resume_pdf, _ = _resolve_pdfs(cfg, "JOB-001", record=rec)
     assert resume_pdf is None
 
@@ -288,13 +288,13 @@ def test_resolve_pdfs_never_returns_master(career_tree):
 # ======================================================================================
 
 def test_resolve_pdfs_falls_back_to_sibling_tailored_cover(career_tree):
-    """JOB-226 shape: uploaded_docs has resume ONLY, but SAM_RIVERA_Cover_Letter.pdf sits in
+    """JOB-226 shape: uploaded_docs has resume ONLY, but APPLICANT_Cover_Letter.pdf sits in
     the same tailored dir. _resolve_pdfs must resolve the cover via the sibling-dir fallback."""
     cfg, paths = career_tree
     rec = _valid_record(paths)
     rec["uploaded_docs"] = [
         {"doc": "resume", "path": str(paths["tailored_resume"]),
-         "name": "SAM_RIVERA_Resume.pdf"},
+         "name": "APPLICANT_Resume.pdf"},
     ]
     resume_pdf, cover_pdf = _resolve_pdfs(cfg, "JOB-226", record=rec)
     assert resume_pdf is not None and Path(resume_pdf) == paths["tailored_resume"]
@@ -309,7 +309,7 @@ def test_resolve_pdfs_cover_fallback_requires_file_on_disk(career_tree):
     rec = _valid_record(paths)
     rec["uploaded_docs"] = [
         {"doc": "resume", "path": str(paths["tailored_resume"]),
-         "name": "SAM_RIVERA_Resume.pdf"},
+         "name": "APPLICANT_Resume.pdf"},
     ]
     paths["tailored_cover"].unlink()  # no cover on disk
     resume_pdf, cover_pdf = _resolve_pdfs(cfg, "JOB-226", record=rec)
@@ -324,7 +324,7 @@ def test_resolve_pdfs_resume_fallback_from_sibling_cover(career_tree):
     rec = _valid_record(paths)
     rec["uploaded_docs"] = [
         {"doc": "cover", "path": str(paths["tailored_cover"]),
-         "name": "SAM_RIVERA_Cover_Letter.pdf"},
+         "name": "APPLICANT_Cover_Letter.pdf"},
     ]
     resume_pdf, cover_pdf = _resolve_pdfs(cfg, "JOB-226", record=rec)
     assert cover_pdf is not None and Path(cover_pdf) == paths["tailored_cover"]
@@ -341,7 +341,7 @@ def _record_with_cover_dict(paths, **over):
     rec = _valid_record(paths)
     rec["uploaded_docs"] = [
         {"doc": "resume", "path": str(paths["tailored_resume"]),
-         "name": "SAM_RIVERA_Resume.pdf"},
+         "name": "APPLICANT_Resume.pdf"},
     ]
     rec["cover"] = {"addressee": "Hiring Team", "salutation": "Dear Hiring Team",
                     "paragraphs": ["I am excited to apply.", "Here is why I fit."]}
@@ -361,7 +361,7 @@ def test_built_cover_resolvable_is_submittable(career_tree):
 def test_built_cover_unresolvable_blocks(career_tree):
     """A tailored cover was built (cover dict with paragraphs) but NO cover PDF exists anywhere →
     the gate must BLOCK with a clear 'built cover can't attach' reason, NOT silently submit
-    resume-only and drop Sam's tailored cover."""
+    resume-only and drop the user's tailored cover."""
     cfg, paths = career_tree
     rec = _record_with_cover_dict(paths)
     paths["tailored_cover"].unlink()  # built in data, but no PDF on disk
@@ -378,7 +378,7 @@ def test_no_cover_app_still_submittable(career_tree):
     rec = _valid_record(paths)
     rec["uploaded_docs"] = [
         {"doc": "resume", "path": str(paths["tailored_resume"]),
-         "name": "SAM_RIVERA_Resume.pdf"},
+         "name": "APPLICANT_Resume.pdf"},
     ]
     rec.pop("cover", None)
     paths["tailored_cover"].unlink()  # genuinely no cover anywhere
@@ -410,7 +410,7 @@ def test_resolved_cover_is_accepted_by_build_answers(career_tree, tmp_path):
     rec = _valid_record(paths)
     rec["uploaded_docs"] = [
         {"doc": "resume", "path": str(paths["tailored_resume"]),
-         "name": "SAM_RIVERA_Resume.pdf"},
+         "name": "APPLICANT_Resume.pdf"},
     ]
     from apply_engine.source_data import build_answers  # local: autoflake strips top-level unused
     resume_pdf, cover_pdf = _resolve_pdfs(cfg, "JOB-226", record=rec)
@@ -429,7 +429,7 @@ def test_resolve_pdfs_never_hands_forward_a_missing_cover(career_tree):
     rec = _valid_record(paths)
     rec["uploaded_docs"] = [
         {"doc": "resume", "path": str(paths["tailored_resume"]),
-         "name": "SAM_RIVERA_Resume.pdf"},
+         "name": "APPLICANT_Resume.pdf"},
         {"doc": "cover", "path": str(paths["appdir"] / "GHOST_Cover_Letter.pdf"),
          "name": "GHOST_Cover_Letter.pdf"},
     ]

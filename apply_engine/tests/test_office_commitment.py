@@ -33,7 +33,7 @@ AUTO_YES_LABELS = [
     "Can you commute to our New York office daily?",
     "Are you willing to work out of our San Francisco office?",
     "Are you able to be in the office 25% of the time?",
-    # RELOCATION — policy flip 2026-06-09: Sam is open to relocation -> always Yes
+    # RELOCATION — policy flip 2026-06-09: the applicant is open to relocation -> always Yes
     "Are you open to relocation for this role?",
     "Are you willing to relocate to Austin for this role?",
     "Would you relocate for this position?",
@@ -64,7 +64,7 @@ UNRELATED_LABELS = [
     "Are you available for on-call rotations?",
     "Are you comfortable working overtime and weekends?",
     # INVERSION / NEGATION — office keyword present but "Yes" is the HARMFUL answer. These
-    # MUST escalate, never auto-Yes (else the engine affirms Sam can't be on-site).
+    # MUST escalate, never auto-Yes (else the engine affirms the applicant can't be on-site).
     "Are you unable to work on-site?",
     "Are you not able to come into the office?",
     "Do you object to our return-to-office policy?",
@@ -94,7 +94,7 @@ def test_unrelated_labels(label):
 # ---- targeted edge cases --------------------------------------------------------------
 
 def test_relocation_is_auto_yes_but_inverted_relocation_escalates():
-    """Policy 2026-06-09: relocation is auto-Yes (Sam is open to it); the negation guard still
+    """Policy 2026-06-09: relocation is auto-Yes (the applicant is open to it); the negation guard still
     catches an inverted phrasing so the engine never affirms he CAN'T relocate."""
     assert classify_office_commitment("Are you open to relocating closer to the office?") == YES
     assert classify_office_commitment("Are you open to relocation for this role?") == YES

@@ -18,15 +18,15 @@ def _write_apps(path, records):
 
 def test_ensure_pdfs_resolves_tailored_app_folder(tmp_path, monkeypatch):
     """ensure_pdfs must follow job_id -> applications.json record -> APP-id+company-slug folder,
-    and return the build pipeline's SAM_RIVERA_*.pdf there. Regression: it previously looked
+    and return the build pipeline's APPLICANT_*.pdf there. Regression: it previously looked
     in applications/<JOB-id>/resume.pdf (wrong id, wrong filename) and always fell back to the
     master, so tailored packages were never attached."""
     career = tmp_path / "career"
     apps_dir = career / "applications"  # PKG_DIR.parent (== career) / "applications"
     folder = apps_dir / "APP-028-Ramp"
     folder.mkdir(parents=True)
-    (folder / "SAM_RIVERA_Resume.pdf").write_bytes(b"%PDF-1.4 resume")
-    (folder / "SAM_RIVERA_Cover_Letter.pdf").write_bytes(b"%PDF-1.4 cover")
+    (folder / "APPLICANT_Resume.pdf").write_bytes(b"%PDF-1.4 resume")
+    (folder / "APPLICANT_Cover_Letter.pdf").write_bytes(b"%PDF-1.4 cover")
 
     apps_json = tmp_path / "applications.json"
     _write_apps(apps_json, [{"id": "APP-028", "job_id": "JOB-216", "company": "Ramp"}])
@@ -35,8 +35,8 @@ def test_ensure_pdfs_resolves_tailored_app_folder(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "APPLICATIONS_JSON", apps_json)
 
     resume_pdf, cover_pdf = ensure_pdfs({"id": "JOB-216"})
-    assert resume_pdf == folder / "SAM_RIVERA_Resume.pdf"
-    assert cover_pdf == folder / "SAM_RIVERA_Cover_Letter.pdf"
+    assert resume_pdf == folder / "APPLICANT_Resume.pdf"
+    assert cover_pdf == folder / "APPLICANT_Cover_Letter.pdf"
 
 
 def test_ensure_pdfs_accepts_plain_filenames(tmp_path, monkeypatch):
@@ -64,7 +64,7 @@ def test_ensure_pdfs_raises_instead_of_master_fallback(tmp_path, monkeypatch):
     must NOT return the generic master resume — even though the master PDF exists on disk."""
     career = tmp_path / "career"
     (career / "apply_engine").mkdir(parents=True)
-    master_pdf = career / "Sam_Rivera_Resume_Master.pdf"
+    master_pdf = career / "APPLICANT_Resume_Master.pdf"
     master_pdf.write_bytes(b"%PDF-1.4 master")
 
     apps_json = tmp_path / "applications.json"
@@ -82,7 +82,7 @@ def test_ensure_pdfs_allow_master_opt_in_still_works(tmp_path, monkeypatch):
     live-stage path never passes. With it set, the old last-resort behaviour is preserved."""
     career = tmp_path / "career"
     (career / "apply_engine").mkdir(parents=True)
-    master_pdf = career / "Sam_Rivera_Resume_Master.pdf"
+    master_pdf = career / "APPLICANT_Resume_Master.pdf"
     master_pdf.write_bytes(b"%PDF-1.4 master")
 
     apps_json = tmp_path / "applications.json"
@@ -132,7 +132,7 @@ def test_build_hooks_degrades_when_cli_missing(tmp_path, capsys, monkeypatch):
     runs on the plan via the `claude` CLI (no Anthropic-API fallback, brief_config untouched), so
     the real degrade trigger is the `claude` CLI being absent from PATH — make_claude_llm raises
     LLMUnavailable, and build_hooks must catch it and fall back to (None, None, "") with a notice
-    so every custom question safely escalates to Sam instead of hard-crashing the run."""
+    so every custom question safely escalates to the user instead of hard-crashing the run."""
     import shutil
     monkeypatch.setattr(shutil, "which", lambda _name: None)  # simulate `claude` not on PATH
 

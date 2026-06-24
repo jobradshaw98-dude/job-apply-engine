@@ -3,7 +3,7 @@
 
 Runs `fill_optional_and_eeo` against the faithful double in fixtures/optional_eeo_form.html
 (native-select EEO + optional free-text + a blank-website field + a required field), proving:
-  * EEO is filled with Sam's disclosed values (gender=Male/race=White/hispanic=No/
+  * EEO is filled with the user's disclosed values (gender=Male/race=White/hispanic=No/
     veteran=not-protected) + disability=decline.
   * Optional free-text gets the canned profile answers (start date / pronunciation / deadlines).
   * Website stays BLANK (no url in the profile -> never fabricated).
@@ -21,7 +21,7 @@ from apply_engine.optional_fill import classify_optional_text
 from apply_engine.optional_fill import _pick_eeo_option
 
 
-# Sam's confirmed real EEO values + the optional-answer patterns (a self-contained profile so
+# the user's confirmed real EEO values + the optional-answer patterns (a self-contained profile so
 # the test never depends on the live applicant_profile.json).
 PROFILE = {
     "website": "",

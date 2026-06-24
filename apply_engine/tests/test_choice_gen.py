@@ -24,7 +24,7 @@ def test_grounded_option_is_selected_when_clean():
 
 
 def test_decline_when_no_factual_basis_is_escalated():
-    # "How familiar are you with Illumina" has no basis in FACTS -> DECLINE -> leave for Sam.
+    # "How familiar are you with Illumina" has no basis in FACTS -> DECLINE -> leave for the user.
     c = resolve_choice(
         "How familiar are you with Illumina's products?",
         ["Very familiar", "Somewhat", "Not at all"],

@@ -2,7 +2,7 @@
 """Tests for the immigration/work-auth DISCLOSURE guard.
 
 The guard makes it IMPOSSIBLE for a ledger-grounded regen to "converge" to a TRUTHFUL-but-policy-
-violating essay that volunteers Sam's visa/citizenship/sponsorship/GC status in free-text
+violating essay that volunteers the user's visa/citizenship/sponsorship/GC status in free-text
 application content. The structured work-auth DROPDOWN answers (sponsorship=No, authorized=Yes) are
 fine — this guard is ONLY about volunteered status in FREE-TEXT (essays, additional-info,
 cover, resume).

@@ -13,7 +13,7 @@ from apply_engine.finish import can_submit, match_custom_entry, _norm_label
 def _ready_record(**over):
     """A minimal record that PASSES can_submit; override fields per test.
 
-    DEMOTION CONTRACT (2026-06-22, Sam's call): the two LLM gates were demoted from required
+    DEMOTION CONTRACT (2026-06-22): the two LLM gates were demoted from required
     submit-blockers to advisory/on-demand. can_submit now blocks on the DETERMINISTIC gate
     (audit.gate_blocks > 0), submitted, non-review-ready status, unfilled-required, and work-auth
     red flags — NOT on the LLM audit verdict / judge_ran or the holistic quality_audit. The default
@@ -100,7 +100,7 @@ def test_pass_audit_verdict_pass_is_fine():
 
 
 # ---- DEMOTED gates (2026-06-22): the LLM verdict / judge_ran / quality_audit no longer block ----
-# Sam's explicit call: the two LLM gates were demoted from required submit-blockers to
+# the user's explicit call: the two LLM gates were demoted from required submit-blockers to
 # advisory/on-demand. With a clean DETERMINISTIC gate (gate_blocks == 0), a clean work-auth answer,
 # and a review-ready status, can_submit now PASSES regardless of the LLM verdict / quality verdict.
 # These tests were flipped from their old "refuse because LLM not PASS / quality FAIL" assertions.
@@ -291,7 +291,7 @@ def test_refuse_work_auth_ambiguous_snippet():
 
 
 def test_refuse_unanswered_work_auth_left_for_sam():
-    # a work-auth question slipped through to Sam: classified halt text in needs_sam.
+    # a work-auth question slipped through to the user: classified halt text in needs_sam.
     # Use a status that is NOT in the not-ready set so this branch is the proven cause,
     # and keep unfilled_required empty so it isn't the earlier refusal.
     rec = _ready_record(status="ready_to_submit", unfilled_required=[], work_auth=[],

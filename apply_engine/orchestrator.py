@@ -1,7 +1,7 @@
 """Per-job conductor: detect -> (LinkedIn resolve) -> auth -> fill -> work-auth guard
 -> verify -> stage-to-brink. NEVER submits. Returns a structured JobOutcome.
 
-Screenshots are full-page so Sam reviews the whole filled form, not just the top."""
+Screenshots are full-page so the user reviews the whole filled form, not just the top."""
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -103,17 +103,17 @@ def _adapter_for(kind: AtsKind):
 
 def _qkey(s):
     """Normalize a question label to a stable key. MUST match regen_answer._qkey exactly
-    (alnum-only, lowercased, first 70 chars) so a Sam-provided answer keyed by the
+    (alnum-only, lowercased, first 70 chars) so a user-provided answer keyed by the
     dashboard/`--provide` is found here against the live-form label."""
     return "".join(c for c in (s or "").lower() if c.isalnum())[:70]
 
 
 def _load_provided_answers(job_id):
     """Read-only, best-effort: load the prior staged record for `job_id` and return a
-    map {qkey(label) -> provided_value} for every custom_q Sam answered himself
+    map {qkey(label) -> provided_value} for every custom_q the user answered himself
     (answered_by == "sam") with a non-empty value.
 
-    This is what lets a re-stage CONSUME an answer Sam supplied via
+    This is what lets a re-stage CONSUME an answer the user supplied via
     `python -m apply_engine.regen_answer <job> --question ... --provide ...` instead of
     re-extracting the question and re-declining it (the bug). `--provide` writes onto the
     custom_q: value (or values for multi), status="answered", answered_by="sam". We key
@@ -257,12 +257,12 @@ def _stage_multi_step(adapter, page, answers, job, ctx, out: "JobOutcome",
         out.status = "needs_input"
         labels = [e.get("q", "")[:60] for e in escalations]
         out.unfilled_required = labels
-        out.halt_reason = "questions need Sam: " + "; ".join(labels[:8])
+        out.halt_reason = "questions need the user: " + "; ".join(labels[:8])
         return out
     if wa_verdict == WorkAuthVerify.FAIL:
         out.status = "needs_sam"
         out.halt_reason = ("staged work-auth answer reads as an AFFIRMATIVE sponsorship "
-                           f"request (red flag) — needs Sam (saw: {wa!r})")
+                           f"request (red flag) — needs the user (saw: {wa!r})")
         return out
     if wa_verdict != WorkAuthVerify.PASS:
         out.status = "needs_sam"
@@ -374,13 +374,13 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
     ctx = RunContext(job_id=job_id, runs_root=runs_root, stamp=stamp)
     out = JobOutcome(job_id=job_id, status="error", run_dir=str(ctx.run_dir))
 
-    # Sam-provided answers from the PRIOR staged record (--provide / dashboard). On a re-stage,
+    # user-provided answers from the PRIOR staged record (--provide / dashboard). On a re-stage,
     # each custom-question handler below consumes these to FILL the live widget instead of
     # re-running the classifier and re-declining the same question (the needs_input->halt loop bug).
     # Read-only + best-effort: no prior record / first stage -> {} -> behavior identical to before.
     provided_answers = _load_provided_answers(job_id)
     if provided_answers:
-        ctx.log("provided", "loaded Sam-provided answers from prior stage",
+        ctx.log("provided", "loaded user-provided answers from prior stage",
                 n=len(provided_answers))
 
     # One real timestamp per run — every halt blocker's deterministic id derives from job_id + this
@@ -412,7 +412,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
     ctx.log("detect", f"ATS={kind.value}", url=url)
 
     # G4: the role's location drives the work-auth geography gate. A role based outside the US (where
-    # Sam's TN authorization does not apply) must NEVER be auto-answered "Yes, authorized" — it
+    # the applicant's work authorization does not apply) must NEVER be auto-answered "Yes, authorized" — it
     # halts into a work_auth human_blocker instead (resolve_work_auth below). Read from the job
     # record's location/JD fields; an absent/sparse value defaults the resolver to the common US path.
     role_location = (job.get("location") or job.get("role_location")
@@ -483,7 +483,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
             # ---- not-an-application guard: a lone email box on a non-ATS page is a NEWSLETTER /
             # contact widget, NOT a job application. The bug: a careers homepage (UNKNOWN ATS) with
             # a "subscribe" email field filled `email` only, and that passed as ready_to_submit —
-            # the engine would have signed Sam up for a newsletter. A real application fills more
+            # the engine would have signed the user up for a newsletter. A real application fills more
             # than a bare email (name + resume at minimum). On a KNOWN ATS the form IS an application
             # so this never triggers; only the generic/custom-page path can hit a newsletter box.
             meaningful = set(out.filled_fields) - {"email"}
@@ -495,7 +495,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                                    "a newsletter/contact form on a careers page, not a job "
                                    "application. Needs the direct apply link.")
                 ctx.log("halt", out.halt_reason, outcome="not_an_application")
-                # escalate/zero_fields: a newsletter box, not a form Sam can answer into.
+                # escalate/zero_fields: a newsletter box, not a form the user can answer into.
                 _halt("zero_fields", code_source="orchestrator.py:343",
                       code_snippet="not_an_application: only an email field filled on a non-ATS page")
                 return out
@@ -503,7 +503,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
             # ---- work-auth guard ----
             # The answer call returns a VERIFIED bool — record the answer ONLY when it actually
             # registered. A blank work-auth field that silently failed to set must HALT to
-            # Sam, never be recorded as answered (which drop_answered would scrub from the
+            # the user, never be recorded as answered (which drop_answered would scrub from the
             # missing set, passing a blank required work-auth field as ready_to_submit).
             from .work_auth_policy import resolve_work_auth
             from .work_auth_policy import WorkAuthResolution
@@ -511,7 +511,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                 # G4: the answer comes from POLICY + GEOGRAPHY (resolve_work_auth), NOT from a
                 # possibly-wrong staged value (the Scale-AI bug: staged sponsorship="Yes"). The
                 # resolver also catches a FOREIGN role (e.g. Cresta "Australia (Remote)") and returns
-                # NEEDS_HUMAN — Sam is authorized in the US (TN), so auto-answering "Yes" for a
+                # NEEDS_HUMAN — the applicant is authorized in the US, so auto-answering "Yes" for a
                 # country he isn't authorized in is a truthfulness violation. It halts into a
                 # work_auth human_blocker instead of auto-Yes.
                 resolution = resolve_work_auth(q.label, role_location)
@@ -532,16 +532,16 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                     geo_mismatch = (classify_work_auth(q.label) != WorkAuthDecision.HALT)
                     if geo_mismatch:
                         out.halt_reason = (
-                            f"work-auth question needs Sam — this role is based outside the US "
+                            f"work-auth question needs the user — this role is based outside the US "
                             f"({role_location!r}), where your US (TN) authorization doesn't apply; "
                             f"not auto-answering: {q.label}")
                     else:
-                        out.halt_reason = f"work-auth question needs Sam: {q.label}"
+                        out.halt_reason = f"work-auth question needs the user: {q.label}"
                     out.status = "needs_sam"
                     ctx.log("halt", out.halt_reason)
                     _shot(page, ctx, "halt")
                     # answerable/work_auth: an ambiguous citizenship/visa question OR a foreign-role
-                    # geography mismatch — only Sam can answer; constrained options, never guessed.
+                    # geography mismatch — only the user can answer; constrained options, never guessed.
                     _halt("work_auth", question=q.label, options=["Yes", "No"], free_text_ok=True,
                           answer_qkey_source=q.label, code_source="orchestrator.py:445",
                           code_snippet="resolve_work_auth -> NEEDS_HUMAN (citizenship/visa or geography mismatch)")
@@ -549,11 +549,11 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                 if not set_ok:
                     out.status = "needs_sam"
                     out.halt_reason = (f"could not set work-auth answer ({field}={ans}) on the "
-                                       f"form — needs Sam: {q.label}")
+                                       f"form — needs the user: {q.label}")
                     ctx.log("halt", out.halt_reason, widget=q.kind)
                     _shot(page, ctx, "halt")
                     # escalate/unknown_widget: a FAILED WIDGET SET is never answerable — a value
-                    # Sam types can't fix a DOM the engine couldn't drive (live-dom rule).
+                    # the user types can't fix a DOM the engine couldn't drive (live-dom rule).
                     _halt("unknown_widget", code_source="orchestrator.py:384",
                           code_snippet="if not set_ok: out.status='needs_sam' (work-auth set failed)")
                     return out
@@ -563,7 +563,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
             # In-office / hybrid / RTO / on-site / days-per-week commitment questions are
             # screen-out gates that policy says are always answered YES (feedback_office_
             # commitment_answer). Drive them deterministically BEFORE the custom-question/LLM
-            # path so they never escalate to Sam. SAME verified-set discipline as work-auth:
+            # path so they never escalate to the user. SAME verified-set discipline as work-auth:
             # answer_yes returns a VERIFIED bool, and a failed set HALTs to needs_sam rather
             # than recording a phantom Yes (a wrong auto-Yes here is a serious error). The
             # classifier already excludes relocation/work-auth/EEO/travel, so only true office-
@@ -573,11 +573,11 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                 if not adapter.answer_yes(page, q):
                     out.status = "needs_sam"
                     out.halt_reason = ("could not set office-commitment answer (Yes) on the "
-                                       f"form — needs Sam: {q.label}")
+                                       f"form — needs the user: {q.label}")
                     ctx.log("halt", out.halt_reason, widget=q.kind)
                     _shot(page, ctx, "halt")
                     # escalate/unknown_widget: a failed widget set (the policy answer IS known —
-                    # Yes — but the DOM wouldn't take it), so route to a watched run, not Sam.
+                    # Yes — but the DOM wouldn't take it), so route to a watched run, not the user.
                     _halt("unknown_widget", code_source="orchestrator.py:404",
                           code_snippet="if not adapter.answer_yes(...): (office-commitment set failed)")
                     return out
@@ -594,7 +594,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                 out.halt_reason = f"verification mismatch: {vr.mismatches}"
                 _shot(page, ctx, "verify_fail")
                 # escalate/unknown_widget: a field set but did not read back — a DOM the engine
-                # can't reliably drive; perception (watched run), not a value Sam types.
+                # can't reliably drive; perception (watched run), not a value the user types.
                 _halt("unknown_widget", code_source="orchestrator.py:432",
                       code_snippet="if not vr.ok: out.status='needs_sam' (readback mismatch)")
                 return out
@@ -615,16 +615,16 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                 _caps = load_capabilities()
                 any_answered = False
 
-                # ── Sam-provided-answer consume (the re-stage fix) ──────────────────────
+                # ── user-provided-answer consume (the re-stage fix) ──────────────────────
                 # Before a handler runs the classifier/drafter on a question, it checks whether
-                # Sam already provided an answer for it (loaded into provided_answers from the
+                # the user already provided an answer for it (loaded into provided_answers from the
                 # prior staged record). If so, it DRIVES that value into the live widget with the
-                # SAME driver the path uses, records it as Sam's own (answered_by="sam", no
+                # SAME driver the path uses, records it as the user's own (answered_by="sam", no
                 # fabrication gate), and skips the classifier. HONORS the live-dom rule: if the
                 # value will not register in the widget, we DO NOT report a phantom "answered" —
                 # the caller records fill_error/escalates exactly as it would for any failed set.
                 def _provided_for(label):
-                    """The value Sam provided for `label`, or None. Pops it so a duplicate
+                    """The value the user provided for `label`, or None. Pops it so a duplicate
                     live label can't double-consume one provided answer."""
                     if not provided_answers:
                         return None
@@ -637,11 +637,11 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                 # adapter's VERIFIED answer_yes/answer_no (Ashby reads back the _act class). SAME
                 # discipline as work-auth: a failed set is NEVER recorded as answered (which would
                 # let drop_answered scrub a blank required screen as ready_to_submit) — it stays in
-                # the missing set for Sam. ESCALATE → left for Sam (not recorded answered).
+                # the missing set for the user. ESCALATE → left for the user (not recorded answered).
                 for q in adapter.find_screening_yesno_questions(page):
                     _pv = _provided_for(q.label)
                     if _pv is not None:
-                        # Sam answered this screen himself — drive his Yes/No via the
+                        # the user answered this screen himself — drive his Yes/No via the
                         # VERIFIED answer_yes/answer_no, no classifier. Honors the live-dom
                         # rule: a failed set is fill_error, never a phantom answered.
                         rec = {"q": q.label, "kind": "screening-yesno",
@@ -683,8 +683,8 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                             _halt("unknown_widget", code_source="orchestrator.py:480",
                                   code_snippet="screening answer did not register on the widget")
                     elif rec["status"] not in ("answered", "declined"):
-                        # ESCALATED (classifier left it for Sam) — answerable/screening_yesno:
-                        # a Yes/No qualifier Sam can answer via the dashboard (maps to custom_q).
+                        # ESCALATED (classifier left it for the user) — answerable/screening_yesno:
+                        # a Yes/No qualifier the user can answer via the dashboard (maps to custom_q).
                         _halt("screening_yesno", question=q.label, options=["Yes", "No"],
                               free_text_ok=False, answer_qkey_source=q.label,
                               code_source="orchestrator.py:466",
@@ -701,7 +701,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                     if _pv is None:
                         _drafted_essays.append(a)
                         continue
-                    # Sam provided this answer — type HIS text into the textarea, no drafter,
+                    # the user provided this answer — type HIS text into the textarea, no drafter,
                     # no fabrication gate. Same fill driver + fill_error discipline as below.
                     rec = {"q": a.label, "kind": a.kind, "status": "answered",
                            "answered_by": "sam", "reason": ""}
@@ -732,7 +732,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                 for sq in extract_select_questions(page):
                     _pv = _provided_for(sq.label)
                     if _pv is not None:
-                        # Sam picked this option — select it by visible label, no classifier.
+                        # the user picked this option — select it by visible label, no classifier.
                         # select_option(label=...) raises if no option matches -> fill_error
                         # (the verified set: a value that isn't an option never reports answered).
                         rec = {"q": sq.label, "kind": "select",
@@ -753,12 +753,12 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                     if len(sq.options) > 60:
                         out.generated.append({"q": sq.label, "kind": "select",
                                               "status": "declined",
-                                              "reason": f"too many options ({len(sq.options)}) — left for Sam"})
+                                              "reason": f"too many options ({len(sq.options)}) — left for the user"})
                         ctx.log("answer", sq.label, status="declined", qkind="select")
                         any_answered = True
                         continue
                     # EEO/self-ID rendered as a <select> -> defer to the G5 optional_fill phase
-                    # (it owns Sam's real voluntary values); don't let the screening path try
+                    # (it owns the applicant's real voluntary values); don't let the screening path try
                     # to "answer" it and fill_error (JOB-281 Together AI race/orientation selects).
                     from .optional_fill import classify_eeo
                     if classify_eeo(sq.label) is not None:
@@ -804,8 +804,8 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                 for cg in extract_checkbox_groups(page):
                     _pv = _provided_for(cg.label)
                     if _pv is not None:
-                        # Sam's comma-separated subset — check each named box, no classifier.
-                        # An option Sam named that isn't on the live group can't be checked:
+                        # the user's comma-separated subset — check each named box, no classifier.
+                        # An option the user named that isn't on the live group can't be checked:
                         # treat that as fill_error (live-dom rule), never a phantom answered.
                         want = [p.strip() for p in _pv.split(",") if p.strip()] or [_pv.strip()]
                         rec = {"q": cg.label, "kind": "checkbox_group",
@@ -862,7 +862,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                 for rq in extract_react_select_questions(page):
                     _pv = _provided_for(rq.label)
                     if _pv is not None:
-                        # Sam picked this react-select option — click it via the VERIFIED
+                        # the user picked this react-select option — click it via the VERIFIED
                         # select_react_by_label (returns True only if the chip reads back). A
                         # value that won't register is fill_error, never a phantom answered
                         # (live-dom rule). This is the Anthropic "AI Policy" / "interviewed
@@ -884,7 +884,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                     if len(rq.options) > 60:
                         out.generated.append({"q": rq.label, "kind": "react_select",
                                               "status": "declined",
-                                              "reason": f"too many options ({len(rq.options)}) — left for Sam"})
+                                              "reason": f"too many options ({len(rq.options)}) — left for the user"})
                         ctx.log("answer", rq.label, status="declined", qkind="react_select")
                         any_answered = True
                         continue
@@ -933,7 +933,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
                             rec["status"] = "fill_error"
                             rec["reason"] = "react-select option click did not register"
                             # escalate/unknown_widget: a react-select the engine couldn't drive —
-                            # a value Sam types can't fix the DOM (live-dom rule), so escalate.
+                            # a value the user types can't fix the DOM (live-dom rule), so escalate.
                             _halt("unknown_widget", code_source="orchestrator.py:580",
                                   code_snippet="react-select option click did not register")
                     out.generated.append(rec)
@@ -1013,7 +1013,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
             _shot(page, ctx, "review_brink")
 
             # ---- captcha pre-check: a captcha-gated form can never be auto-submitted ----
-            # The engine never solves captchas. If one is present, divert to Sam for a
+            # The engine never solves captchas. If one is present, divert to the user for a
             # MANUAL submit (he solves it + clicks submit) — never a hard failure, and never a
             # false ready_to_submit. INVISIBLE reCAPTCHA (background scoring) returns None and is
             # correctly ignored here so it doesn't divert every Greenhouse/Ashby application.
@@ -1021,7 +1021,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
             cap = detect_captcha(page)
             if cap:
                 out.status = "needs_sam"
-                out.halt_reason = (f"captcha-gated ({cap}) — manual submit required: Sam "
+                out.halt_reason = (f"captcha-gated ({cap}) — manual submit required: the user "
                                    "solves the captcha and clicks submit")
                 ctx.log("captcha", out.halt_reason, captcha_kind=cap)
                 # escalate/captcha: only a human-in-browser can solve it — never an answer box.
@@ -1032,7 +1032,7 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
             if missing:
                 out.status = "needs_input"
                 out.unfilled_required = missing
-                out.halt_reason = ("required fields still need Sam: "
+                out.halt_reason = ("required fields still need the user: "
                                    + "; ".join(missing[:12]))
                 ctx.log("needs_input", "required fields unfilled", fields=missing)
                 # First missing item is the surfaced question. A real labeled question (has a space

@@ -1,5 +1,5 @@
 """Extract the LLM-GENERATED custom answers from a run so the career-draft-auditor (the
-judgment gate) can trace them to the claims ledger before they reach Sam.
+judgment gate) can trace them to the claims ledger before they reach the user.
 
 The deterministic audit_gate already ran in-engine on each answer; this surfaces the same
 answers for the stricter human-judgment fabrication/overstatement audit. Only answers that

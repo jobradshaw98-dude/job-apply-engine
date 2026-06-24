@@ -210,7 +210,7 @@ class WorkdayAdapter(FormAdapterBase):
 
         answer_fn/audit_fn/facts (opt-in) bind a gated grounded-choice picker used on
         custom application-question dropdowns: a supported option is auto-selected, an
-        unsupported/judgment-call question DECLINEs and is escalated to Sam. Without
+        unsupported/judgment-call question DECLINEs and is escalated to the user. Without
         them every custom question is escalated (the safe default).
         """
         self._choose = make_resolver(facts, answer_fn, audit_fn)
@@ -241,7 +241,7 @@ class WorkdayAdapter(FormAdapterBase):
                         result["reached"] = step or "account-gate"
                         result["error"] = self._gate_note or (
                             "stuck at Workday account/sign-in gate "
-                            "(creds missing or sign-in failed) — needs Sam")
+                            "(creds missing or sign-in failed) — needs the user")
                         result["escalations"].append(
                             {"field": "account", "q": "Workday account gate",
                              "reason": result["error"]})
@@ -318,7 +318,7 @@ class WorkdayAdapter(FormAdapterBase):
     def _handle_account_gate(self, page, profile: dict = None, job: dict = None) -> bool:
         """The apply wizard opens NOT signed in on a 'Create Account / Sign In' gate. Stored
         creds -> sign in; else CREATE an account autonomously. If the tenant then requires
-        EMAIL VERIFICATION (ResMed), read the verify link from Sam's inbox, click it, and
+        EMAIL VERIFICATION (ResMed), read the verify link from the user's inbox, click it, and
         re-enter. Returns True if the gate cleared, False to escalate."""
         if not page.query_selector("[data-automation-id='createAccountSubmitButton'], "
                                    "[data-automation-id='signInSubmitButton']"):
@@ -350,7 +350,7 @@ class WorkdayAdapter(FormAdapterBase):
             page.wait_for_timeout(10000)
         if not link:
             self._gate_note = ("account created but email verification needed and no verify "
-                               "email was found in the inbox — needs Sam")
+                               "email was found in the inbox — needs the user")
             return False
         page.goto(link, wait_until="domcontentloaded")
         page.wait_for_timeout(3000)
@@ -448,7 +448,7 @@ class WorkdayAdapter(FormAdapterBase):
         if self._verify_email_required(page):
             self._store_creds(page, email, password)
             self._gate_note = ("account created but tenant requires EMAIL VERIFICATION "
-                               "before continuing — click the Workday verify link in Sam's "
+                               "before continuing — click the Workday verify link in the user's "
                                "inbox (no Gmail-verify in the engine yet), then re-run")
         return False
 
@@ -615,12 +615,12 @@ class WorkdayAdapter(FormAdapterBase):
                     result["escalations"].append({
                         "field": fid, "q": qtext,
                         "reason": ("combined authorized-without-sponsorship question: no "
-                                   "affirmative no-red-flag option matched — needs Sam"),
+                                   "affirmative no-red-flag option matched — needs the user"),
                     })
             elif decision == WorkAuthDecision.HALT:
                 # citizenship / free-text visa — never guess. Record + best-effort skip.
                 result["escalations"].append(
-                    {"field": fid, "q": qtext, "reason": "work-auth HALT (needs Sam)"})
+                    {"field": fid, "q": qtext, "reason": "work-auth HALT (needs the user)"})
             elif any(k in low for k in
                      ("currently working", "ever worked", "previously worked", "worked at")):
                 W.button_select(page, fid, "No")
@@ -638,7 +638,7 @@ class WorkdayAdapter(FormAdapterBase):
         With a resolver, read the dropdown's offered options and let the gated picker
         choose a supported one. Only an `answered` choice that actually selects is treated
         as resolved; DECLINE (no factual basis — e.g. a familiarity self-assessment), a
-        gate BLOCK, or a failed select all escalate to Sam, never a guess.
+        gate BLOCK, or a failed select all escalate to the user, never a guess.
         """
         if self._choose is None:
             result["escalations"].append({
@@ -653,7 +653,7 @@ class WorkdayAdapter(FormAdapterBase):
         result["escalations"].append({
             "field": fid, "q": qtext,
             "reason": f"custom question ({choice.status}): "
-                      f"{choice.reason or 'unresolved'} — left for Sam",
+                      f"{choice.reason or 'unresolved'} — left for the user",
         })
 
     def _pick_first(self, page, button_id, prefs) -> bool:

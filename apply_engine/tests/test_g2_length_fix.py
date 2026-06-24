@@ -145,11 +145,11 @@ def career_tree(tmp_path, monkeypatch):
     root = tmp_path / "career"
     pkg = root / "apply_engine"
     pkg.mkdir(parents=True)
-    (root / "Sam_Rivera_Resume_Master.pdf").write_text("MASTER", encoding="utf-8")
+    (root / "APPLICANT_Resume_Master.pdf").write_text("MASTER", encoding="utf-8")
     appdir = root / "applications" / "APP-001-Anthropic"
     appdir.mkdir(parents=True)
-    (appdir / "SAM_RIVERA_Resume.pdf").write_text("TAILORED", encoding="utf-8")
-    (appdir / "SAM_RIVERA_Cover_Letter.pdf").write_text("COVER", encoding="utf-8")
+    (appdir / "APPLICANT_Resume.pdf").write_text("TAILORED", encoding="utf-8")
+    (appdir / "APPLICANT_Cover_Letter.pdf").write_text("COVER", encoding="utf-8")
     data_dir = tmp_path / "data"
     data_dir.mkdir()
     monkeypatch.setattr(_cfg, "ARIA_DATA", data_dir)
@@ -175,10 +175,10 @@ def _record(appdir: Path, essay_value: str) -> dict:
         "job_id": "JOB-237", "company": "Anthropic", "role": "Applied AI Engineer",
         "status": "ready_to_submit", "submitted": False,
         "uploaded_docs": [
-            {"doc": "resume", "path": str(appdir / "SAM_RIVERA_Resume.pdf"),
-             "name": "SAM_RIVERA_Resume.pdf"},
-            {"doc": "cover", "path": str(appdir / "SAM_RIVERA_Cover_Letter.pdf"),
-             "name": "SAM_RIVERA_Cover_Letter.pdf"},
+            {"doc": "resume", "path": str(appdir / "APPLICANT_Resume.pdf"),
+             "name": "APPLICANT_Resume.pdf"},
+            {"doc": "cover", "path": str(appdir / "APPLICANT_Cover_Letter.pdf"),
+             "name": "APPLICANT_Cover_Letter.pdf"},
         ],
         "work_auth": [{"field": "sponsor", "answer": "No"}],
         "custom_qs": [{"q": "Why Anthropic?", "kind": "essay", "status": "answered",

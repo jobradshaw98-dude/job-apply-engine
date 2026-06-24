@@ -51,8 +51,8 @@ def build_hooks(answer: bool, job: dict, recon: bool = False) -> tuple:
     """Wire the custom-question conversion path. When --answer is set, return the real
     Claude drafter + fabrication audit gate + grounding facts (resume + claims ledger + JD)
     so the engine can fill essays/dropdowns. Default-off returns (None, None, "") — the
-    engine then escalates every custom question to Sam (the safe default). Every drafted
-    answer still requires the career-draft-auditor subagent + Sam's eyes before submit.
+    engine then escalates every custom question to the user (the safe default). Every drafted
+    answer still requires the career-draft-auditor subagent + the user's eyes before submit.
 
     When `recon` is set (P3, real apply path only — never in unit tests), the web-enabled recon
     agent researches the company/role first and its brief is threaded into the drafter's grounding
@@ -140,7 +140,7 @@ def ensure_pdfs(job: dict, *, allow_master: bool = False) -> tuple:
     Resolution order:
       1. The build pipeline's per-application output folder, applications/<APP-id>-<slug>/,
          located by matching the applications.json record on job_id. build.py emits
-         SAM_RIVERA_Resume.pdf / SAM_RIVERA_Cover_Letter.pdf there; older runs may have
+         APPLICANT_Resume.pdf / APPLICANT_Cover_Letter.pdf there; older runs may have
          emitted plain resume.pdf / cover.pdf, so both names are accepted.
       2. Legacy layout applications/<JOB-id>/resume.pdf (kept for any pre-existing per-job folders).
 
@@ -153,14 +153,14 @@ def ensure_pdfs(job: dict, *, allow_master: bool = False) -> tuple:
 
     app_dir = _tailored_app_dir(job)
     if app_dir is not None:
-        resume_pdf = _first_existing(app_dir, ["SAM_RIVERA_Resume.pdf", "resume.pdf"])
-        cover_pdf = _first_existing(app_dir, ["SAM_RIVERA_Cover_Letter.pdf", "cover.pdf"])
+        resume_pdf = _first_existing(app_dir, ["APPLICANT_Resume.pdf", "resume.pdf"])
+        cover_pdf = _first_existing(app_dir, ["APPLICANT_Cover_Letter.pdf", "cover.pdf"])
 
     if resume_pdf is None:
         legacy = config.PKG_DIR.parent / "applications" / job.get("id", "")
-        resume_pdf = _first_existing(legacy, ["SAM_RIVERA_Resume.pdf", "resume.pdf"])
+        resume_pdf = _first_existing(legacy, ["APPLICANT_Resume.pdf", "resume.pdf"])
         if cover_pdf is None:
-            cover_pdf = _first_existing(legacy, ["SAM_RIVERA_Cover_Letter.pdf", "cover.pdf"])
+            cover_pdf = _first_existing(legacy, ["APPLICANT_Cover_Letter.pdf", "cover.pdf"])
 
     if resume_pdf is None:
         if not allow_master:
@@ -168,7 +168,7 @@ def ensure_pdfs(job: dict, *, allow_master: bool = False) -> tuple:
                 f"no tailored resume PDF found for {job.get('id', '?')} "
                 f"({job.get('company', '')}) — refusing to attach the generic master resume")
         # Explicit debug opt-in only: the live-stage path never reaches here.
-        master = config.PKG_DIR.parent / "Sam_Rivera_Resume_Master.docx"
+        master = config.PKG_DIR.parent / "APPLICANT_Resume_Master.docx"
         master_pdf = master.with_suffix(".pdf")
         resume_pdf = master_pdf if master_pdf.exists() else master
 
@@ -268,7 +268,7 @@ def chain_accuracy_review(outcome, *, answered: bool) -> Optional[str]:
     # accuracy-review button, every post-edit re-check — runs fabrication-only and leaves this
     # quality_audit untouched, so the quality judge never spins up a fresh batch of advisory fixes
     # on each edit (the treadmill fix, 2026-06-10).
-    # DETERMINISTIC-ONLY at stage (2026-06-22, Sam's call): the LLM accuracy + quality judges
+    # DETERMINISTIC-ONLY at stage (2026-06-22): the LLM accuracy + quality judges
     # were demoted to advisory/on-demand, so stage-end stamps ONLY the deterministic gate verdict
     # (gate_blocks) — no claude -p, no quota burn, no holistic quality pass. finish.can_submit now
     # gates on gate_blocks alone, so this stamp is what locks/unlocks Submit. The LLM judges still
@@ -435,7 +435,7 @@ def _has_tailored_content(rec: Optional[dict]) -> bool:
     """True iff the APP record already carries a non-empty tailored resume AND cover dict.
 
     'Non-empty' means both keys are dicts with actual content — an empty {} resume or a record
-    with only one of the two is treated as incomplete (regenerate). Sam may have hand-edited
+    with only one of the two is treated as incomplete (regenerate). the user may have hand-edited
     the tailored content via the dashboard, so when it IS present we use it as-is and never
     regenerate over his edits."""
     if not isinstance(rec, dict):
@@ -498,8 +498,8 @@ def main(argv=None) -> int:
     ap.add_argument("--headless", action="store_true", default=False)
     ap.add_argument("--answer", action="store_true", default=False,
                     help="Enable grounded LLM drafting + fabrication audit gate for custom "
-                         "questions (default off: every custom question is escalated to Sam). "
-                         "Drafted answers still require the career-draft-auditor + Sam before submit.")
+                         "questions (default off: every custom question is escalated to the user). "
+                         "Drafted answers still require the career-draft-auditor + the user before submit.")
     ap.add_argument("--rebuild", action="store_true", default=False,
                     help="Force a fresh tailored package: drop the stored resume+cover so they are "
                          "REGENERATED with the current drafting pipeline instead of reused. Use to "

@@ -238,7 +238,7 @@ def test_can_submit_quality_flag_allows():
 
 def test_can_submit_quality_fail_no_longer_blocks():
     # FLIPPED: a FAIL quality verdict no longer blocks submit (clean deterministic gate). The
-    # quality judge is advisory/on-demand now; Sam's review is the quality gate.
+    # quality judge is advisory/on-demand now; the user's review is the quality gate.
     ok, reason = can_submit(_ready(quality_audit={"verdict": "FAIL", "judge_ran": True,
                                                   "summary": "doesn't cover the JD",
                                                   "dimensions": {}}))

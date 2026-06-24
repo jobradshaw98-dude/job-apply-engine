@@ -143,5 +143,5 @@ def test_lever_workauth_checkbox_group_skipped(fixture_server, tmp_path):
     with launch_profile(headless=True, profile_dir=tmp_path / "p") as (ctx, page):
         page.goto(f"{fixture_server}/lever_custom_form.html")
         labels = [g.label.lower() for g in extract_checkbox_groups(page)]
-        # the "Which work authorizations do you hold?" group must be left for Sam
+        # the "Which work authorizations do you hold?" group must be left for the user
         assert not any("work authorization" in l for l in labels)

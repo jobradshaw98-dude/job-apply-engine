@@ -52,8 +52,8 @@ def test_apply_halts_on_citizenship_question(fixture_server, answers, tmp_path, 
 
 def test_apply_halts_on_geography_mismatch_work_auth(fixture_server, answers, tmp_path, monkeypatch):
     """G4: a work-AUTHORIZATION question (which for a US role would auto-answer Yes) must instead
-    HALT to needs_sam when the role is based abroad (Cresta "Australia (Remote)") — Sam's US
-    TN does not authorize work in Australia, so auto-Yes there is a truthfulness violation. The
+    HALT to needs_sam when the role is based abroad (Cresta "Australia (Remote)") — the applicant's
+    authorization does not extend to Australia, so auto-Yes there is a truthfulness violation. The
     blocker is an ANSWERABLE work_auth human_blocker, never an escalate/auto-answer."""
     import apply_engine.adapters.greenhouse as gh
     from apply_engine.adapters.base import WorkAuthQuestion

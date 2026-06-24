@@ -11,8 +11,21 @@ BRIEF_CONFIG = config.ARIA_DATA / "brief_config.json"
 RESUME = config.ARIA_DATA / "master_resume.md"
 LEDGER = CAREER_DIR / "claims_ledger.md"
 VOICE = config.PKG_DIR / "voice_profile.md"         # identity + craft (style, not facts)
+# Capabilities + resume rules: prefer the user-supplied real file (git-ignored); fall back to the
+# committed *.example.md (the fictional demo applicant) — mirrors VOICE/voice_profile.example.md.
 CAPABILITIES = config.PKG_DIR / "capabilities.md"   # truthful Yes/No + AI-native coding framing
+CAPABILITIES_EXAMPLE = config.PKG_DIR / "capabilities.example.md"
 RESUME_RULES_FILE = config.PKG_DIR / "resume_rules.md"  # learned resume/deck rules (/career-learn)
+RESUME_RULES_EXAMPLE = config.PKG_DIR / "resume_rules.example.md"
+
+
+def _first_existing(*paths):
+    """Return the first path that exists (user-supplied real file preferred), else the last one
+    so a missing real file degrades to the committed example rather than vanishing."""
+    for p in paths:
+        if Path(p).exists():
+            return p
+    return paths[-1]
 # Identity bedrock — the unfakeable themes the applicant writes high-stakes positioning FROM.
 # User-supplied (gitignored); copy narrative.example.md → narrative.md and fill it in. Feeding it
 # FIRST is the biggest lever on whether the drafter writes from who you are vs. generic boilerplate.
@@ -44,12 +57,12 @@ def load_facts(job: dict = None, max_chars: int = 200000, recon_brief: str = "")
     """Grounding context for answer drafting.
 
     `recon_brief` (P3): the web-research brief from run_recon — company/role intel + fit mapping.
-    It is fed as TARGETING guidance (what's true about the company and which of Sam's real
+    It is fed as TARGETING guidance (what's true about the company and which of the applicant's real
     experiences map to the role), explicitly NOT a source of self-claims: the drafter still grounds
-    every assertion about Sam in his own corpus. This is what lets a corpus-only drafter write
+    every assertion about the applicant in their own corpus. This is what lets a corpus-only drafter write
     company-specific answers without web facts leaking in as fabricated personal claims.
 
-    Order matters: NARRATIVE + VOICE first (who Sam is + how he writes), then the hard
+    Order matters: NARRATIVE + VOICE first (who the applicant is + how they write), then the hard
     factual grounding (resume + vetted claims), then the JD for relevance. The
     VOICE/NARRATIVE blocks are style/identity guidance — clearly labelled NOT a source of
     factual claims — so answers read with cover-letter craft while every asserted fact
@@ -78,9 +91,10 @@ def load_facts(job: dict = None, max_chars: int = 200000, recon_brief: str = "")
     _ground(parts,
             "# CAPABILITY FACTS (truthful — incl. how to frame coding: AI-native, AI-orchestrated; "
             "assert shipped/operated systems, not unaided hand-coding)\n",
-            CAPABILITIES)
+            _first_existing(CAPABILITIES, CAPABILITIES_EXAMPLE))
     try:
-        _rr = RESUME_RULES_FILE.read_text(encoding="utf-8").strip()
+        _rr = _first_existing(RESUME_RULES_FILE,
+                              RESUME_RULES_EXAMPLE).read_text(encoding="utf-8").strip()
         if _rr:
             parts.append("# LEARNED RESUME RULES (durable corrections distilled from past "
                          "edits — style/format guidance, NOT a source of factual claims)\n" + _rr)
@@ -99,22 +113,22 @@ def load_facts(job: dict = None, max_chars: int = 200000, recon_brief: str = "")
                      + str(job["jd_text"]))
     if recon_brief and recon_brief.strip():
         # Recon research brief: company/role intel + fit mapping for TARGETING. Explicitly NOT a
-        # source of self-claims — every assertion about Sam still traces to his own corpus above.
+        # source of self-claims — every assertion about the applicant still traces to their own corpus above.
         parts.append("# RECON BRIEF (researched company/role intel + fit mapping — use ONLY to "
-                     "target and tailor; NOT a source of factual claims about Sam)\n"
+                     "target and tailor; NOT a source of factual claims about the applicant)\n"
                      + recon_brief.strip())
     return "\n\n".join(parts)[:max_chars]
 
 
 class LLMUnavailable(RuntimeError):
     """Raised when generation can't run on the Claude subscription. We FAIL LOUD here rather
-    than fall back to the metered Anthropic API — Sam's hard rule is no surprise API spend."""
+    than fall back to the metered Anthropic API — the user's hard rule is no surprise API spend."""
 
 
 def make_claude_llm(model: str = "sonnet"):
     """Text generator for drafting/auditing answers.
 
-    Runs ONLY on Sam's Claude SUBSCRIPTION via Claude Code headless (`claude -p`), so
+    Runs ONLY on the user's Claude SUBSCRIPTION via Claude Code headless (`claude -p`), so
     background drafting and dashboard-triggered edits cost zero API tokens (plan quota only).
     There is intentionally NO Anthropic-API fallback: if the Claude Code CLI is missing or a
     call fails, we raise LLMUnavailable so nothing ever silently bills the API. (The API key
@@ -237,7 +251,7 @@ def run_claude_agent(prompt: str, *, model: str = "sonnet", allow_web: bool = Fa
     """A GUARDED agentic `claude -p` — the building block for the apply pipeline's agent fleet.
 
     Unlike make_claude_llm (a blind text generator), this lets the model REACH: it runs with
-    read-only file tools (Read/Grep/Glob) so it can ground itself in Sam's actual corpus, and
+    read-only file tools (Read/Grep/Glob) so it can ground itself in the applicant's actual corpus, and
     — for the recon role only (allow_web=True) — WebSearch/WebFetch to research the company, role,
     and networking openings. Hard guardrails:
       • Mutating/shell tools (Write/Edit/Bash/...) are ALWAYS denied — an agent can never change a
@@ -303,22 +317,22 @@ def run_claude_agent(prompt: str, *, model: str = "sonnet", allow_web: bool = Fa
 
 
 _DRAFTER_CONTRACT = (
-    "You are drafting Sam Rivera's own job-application answers — first person, his voice. "
-    "The prompt gives you a FACTS block (his narrative, voice, resume, vetted claims, and the JD) "
-    "as your floor. You ALSO have read-only tools (Read/Grep/Glob) and may REACH INTO his career "
+    "You are drafting the applicant's own job-application answers — first person, their voice. "
+    "The prompt gives you a FACTS block (their narrative, voice, resume, vetted claims, and the JD) "
+    "as your floor. You ALSO have read-only tools (Read/Grep/Glob) and may REACH INTO their career "
     "corpus for anything that makes the answer stronger and more specific:\n"
-    f"- Past cover letters / writing bank under: {_WRITING_BANK} (match his real cadence; reuse a "
-    "turn of phrase or framing he has actually used — never copy whole passages).\n"
-    f"- His memory (narrative, project notes, feedback) under: {_MEMORY_PROJECT} and {_MEMORY_GLOBAL} "
+    f"- Past cover letters / writing bank under: {_WRITING_BANK} (match their real cadence; reuse a "
+    "turn of phrase or framing they have actually used — never copy whole passages).\n"
+    f"- Their memory (narrative, project notes, feedback) under: {_MEMORY_PROJECT} and {_MEMORY_GLOBAL} "
     "(to pick the most role-relevant, truthful example).\n"
     "HARD RULES (never break, regardless of what you read):\n"
-    "- Assert ONLY what Sam's corpus supports. Never invent a tool, number, employer, metric, "
+    "- Assert ONLY what the applicant's corpus supports. Never invent a tool, number, employer, metric, "
     "or outcome.\n"
-    "- For a question about experience he lacks EXACTLY (external customers, a specific language, an "
-    "industry): do NOT blank-decline — give an honest answer leading with his closest real "
+    "- For a question about experience they lack EXACTLY (external customers, a specific language, an "
+    "industry): do NOT blank-decline — give an honest answer leading with their closest real "
     "experience and candid about the gap. DECLINE only if answering would require inventing a fact, "
     "or the question asks for a personal commitment (location/relocation/office/start/pay).\n"
-    "- The web is NOT available to you and must never be a source — ground every claim in his "
+    "- The web is NOT available to you and must never be a source — ground every claim in their "
     "own corpus.\n"
     "- NEVER mention visa, citizenship, work authorization, sponsorship, relocation, start date, "
     "or pay. Those are handled elsewhere.\n"
@@ -330,7 +344,7 @@ def make_claude_drafter(model: str = "sonnet"):
     """The agentic answer DRAFTER (P1 of the agent-fleet rebuild).
 
     Drop-in for make_claude_llm's text generator, but agentic: it keeps the full FACTS blob inline
-    as a floor AND can reach Sam's writing bank + memory (read-only, scoped, NO web) to ground a
+    as a floor AND can reach the applicant's writing bank + memory (read-only, scoped, NO web) to ground a
     sharper, more voice-true answer — the reach that makes a live draft better than a blind one.
     Same plan-quota-only / no-API-fallback guarantee. Returns a callable(prompt) -> text so it slots
     into answer_gen.generate unchanged (draft + refine + critique + revise all gain corpus reach)."""
@@ -351,8 +365,8 @@ def make_claude_drafter(model: str = "sonnet"):
 
 
 _SINGLE_CALL_CONTRACT = (
-    "You are drafting Sam Rivera's own job-application answers — first person, his voice. You "
-    "have read-only tools (Read/Grep/Glob) and may reach his career corpus (writing bank, memory) "
+    "You are drafting the applicant's own job-application answers — first person, their voice. You "
+    "have read-only tools (Read/Grep/Glob) and may reach their career corpus (writing bank, memory) "
     "for the sharpest, most voice-true, role-relevant material. The web is NOT available.\n"
     "You will receive SEVERAL questions for ONE application. For EACH question, work internally: "
     "draft a strong answer, then self-critique it hard, then write the FINAL revised answer. Your "
@@ -365,7 +379,7 @@ _SINGLE_CALL_CONTRACT = (
     "vague claim. Never invent a tool, number, or employer.\n"
     "- RANGE — across the set, lead each answer with a DIFFERENT hero example so the whole "
     "application shows breadth, not one story retold.\n"
-    "- HONEST REFRAME — for an experience he lacks exactly (external customers, a language, an "
+    "- HONEST REFRAME — for an experience they lack exactly (external customers, a language, an "
     "industry), give an honest grounded answer naming the closest real experience and candid about "
     "the gap; do NOT blank-decline.\n"
     "HARD RULES: NEVER mention visa/citizenship/work-authorization/sponsorship/relocation/start-"
@@ -414,8 +428,8 @@ _LEAN_RECON_CONTRACT = _load_skill("recon-lean")
 
 def run_recon(job: dict, model: str = "sonnet", timeout: int = 600, lean: bool = False) -> str:
     """P3: the web-enabled RECON agent. Researches company/role and returns a brief the (corpus-only)
-    drafter consumes for company-specific targeting — it researches the TARGET, never writes Sam's
-    claims, so web facts inform relevance without becoming fabricated self-claims.
+    drafter consumes for company-specific targeting — it researches the TARGET, never writes the
+    applicant's claims, so web facts inform relevance without becoming fabricated self-claims.
 
     lean=True: WebSearch snippets only (no expensive WebFetch page pulls), a tight ~200-word
     drafting brief (company/values/hooks) — drops the networking/comp/status sections the drafter
@@ -436,7 +450,7 @@ def run_recon(job: dict, model: str = "sonnet", timeout: int = 600, lean: bool =
 # Em-dashes read as an AI tell, so an ANSWER carrying more than two of them is blocked here.
 # This is the answer-path gate (drafting + regen + refresh_audit all route through make_audit_fn);
 # it deliberately does NOT touch audit_gate.py's resume/cover bullet rule (run_on_emdash), which
-# Sam keeps as-is. Threshold > 2 (not > 1) leaves the one-or-zero target to the drafting
+# the user keeps as-is. Threshold > 2 (not > 1) leaves the one-or-zero target to the drafting
 # prompt + voice profile while catching the egregious "em-dashes everywhere" case deterministically.
 _MAX_ANSWER_EMDASHES = 2
 
@@ -461,7 +475,7 @@ def make_audit_fn():
             # is ALLOWED in free-text ESSAY answers — a concrete, vivid claim is stronger than a
             # vague '~90%'. The ledger's percentage-only rule stays for RESUME/COVER bullets (clean,
             # scannable, consistent), which audit on the audit_gate path directly, NOT through this
-            # answer wrapper. So we drop only the 'impact_as_count' block here (2026-06-17, Sam).
+            # answer wrapper. So we drop only the 'impact_as_count' block here (2026-06-17).
             notes = [v.get("note") or v.get("rule")
                      for v in res.get("violations", [])
                      if v.get("severity") == "block" and v.get("rule") != "impact_as_count"]
@@ -475,7 +489,7 @@ def make_audit_fn():
             notes.append(f"too many em-dashes ({n_dash}) — an AI tell; rewrite with "
                          "periods/commas")
         # Immigration/work-auth DISCLOSURE backstop (deterministic). A ledger-grounded answer can be
-        # TRUTHFUL yet volunteer Sam's visa/citizenship/sponsorship/GC status — the work-auth
+        # TRUTHFUL yet volunteer the applicant's visa/citizenship/sponsorship/GC status — the work-auth
         # policy forbids that in free-text content. Surfacing it as a gate BLOCK note makes the
         # answer-drafting + regen iterate-to-clean loops converge by REMOVING the disclosure (and it
         # also flows through refresh_audit's gate_fn). The structured findings in refresh_audit add

@@ -1,7 +1,7 @@
 """CAPTCHA pre-check — detect a captcha that would block an automated submit.
 
 PURPOSE: the engine NEVER solves a captcha. If a form is captcha-gated, the record
-must be routed to Sam for a manual submit (he solves the captcha + clicks submit),
+must be routed to the user for a manual submit (he solves the captcha + clicks submit),
 NOT failed hard. So this module's only job is to RECOGNIZE the gate, so two callers can
 divert cleanly:
 

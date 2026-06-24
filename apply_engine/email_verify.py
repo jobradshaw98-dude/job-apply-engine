@@ -1,4 +1,4 @@
-"""Read a Workday account-verification link from Sam's inbox so the engine can clear
+"""Read a Workday account-verification link from the user's inbox so the engine can clear
 tenants (e.g. ResMed) that require email verification before the apply wizard proceeds.
 
 Pure `extract_verify_link` (unit-tested) + a thin IMAP fetcher (live, brief_config creds)."""

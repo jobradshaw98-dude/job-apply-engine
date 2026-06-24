@@ -38,7 +38,7 @@ G2 under-length essay still outstanding keeps the loop from converging.
 CROSS-PROCESS SAFETY
 --------------------
 The loop runs in the ENGINE process and takes the FILE-BASED converge_lock(job_id) (NOT the server's
-in-memory _SUBMIT_LOCKS — the engine can't see those). It refuses to start while a Sam edit is mid-
+in-memory _SUBMIT_LOCKS — the engine can't see those). It refuses to start while a user edit is mid-
 flight (is_edit_in_flight) so it can't race the very fabrication/calibration gates it's trying to clear.
 Every manifest write goes through the merge-safe + filemutex pattern (the regen functions and
 staged_manifest writers already do this; convergence's own writes use _conv_write below, the same
@@ -269,12 +269,12 @@ def _length_block_findings(record: dict) -> List[dict]:
 
 
 # --------------------------------------------------------------------------------------
-# QUALITY-DIMENSION drive (the REASONED-CONVERGENCE layer — Sam's 2026-06-14 correction)
+# QUALITY-DIMENSION drive (the REASONED-CONVERGENCE layer — the 2026-06-14 correction)
 # --------------------------------------------------------------------------------------
 #
 # WHY THIS EXISTS, and how it reconciles the two HARD feedback rules.
 # The BLOCK-class layer above (fab/calib/length) converges BY REMOVAL — it clears hard floors. It
-# does NOT make a merely-weak package STRONG. Sam's revised spec: the loop should ALSO iterate on
+# does NOT make a merely-weak package STRONG. the revised spec: the loop should ALSO iterate on
 # the holistic quality dimensions (jd_coverage / fit / specificity / voice) that score <=3 and carry
 # a concrete, groundable `fix`, re-judging after each round, UNTIL one of four STOP conditions:
 #   1. CONVERGED        — no dimension <=3 with a groundable fix remains (the package is strong).
@@ -302,7 +302,7 @@ def _length_block_findings(record: dict) -> List[dict]:
 # itself blocked the same round — the drive physically cannot raise a score by fabricating. When the
 # regen's own fab-gate rejects the fix, that dimension is at its GROUNDED CEILING.
 
-# How many QUALITY re-judge rounds the drive may run. Set 3 (Sam's spec). Deliberately small: a
+# How many QUALITY re-judge rounds the drive may run. Set 3 (per spec). Deliberately small: a
 # real package usually needs 0-1 grounded quality fixes; the cap only bounds a pathological judge.
 MAX_QUALITY_ROUNDS = 3
 
@@ -414,13 +414,13 @@ def _quality_strict_improved(snap: dict, cur: dict) -> bool:
     return rose and not regressed
 
 
-# A verify_ready reason that names one of these is a HUMAN-ONLY blocker (a fact only Sam has) —
-# the loop must STOP and ask, not "fix" it. Work-auth geography, an unfilled required field Sam
+# A verify_ready reason that names one of these is a HUMAN-ONLY blocker (a fact only the user has) —
+# the loop must STOP and ask, not "fix" it. Work-auth geography, an unfilled required field the user
 # must supply, and a degraded/unavailable judge all belong here. Matched case-insensitively on the
 # verify_ready reason string (verify_ready returns named, human-readable reasons).
 _HUMAN_ONLY_REASON_MARKERS = (
-    "work-auth",            # a sponsorship/visa/geography answer only Sam can confirm
-    "needs sam",         # a field the orchestrator left for Sam
+    "work-auth",            # a sponsorship/visa/geography answer only the user can confirm
+    "needs sam",         # a field the orchestrator left for the user
     "still need sam",
     "judge was unavailable",  # degraded fabrication judge -> judge-unavailable, surface (§6 #13)
     "judge didn't run",
@@ -442,15 +442,15 @@ def _verify_ready_blocks(record: dict) -> Tuple[bool, str]:
 # --------------------------------------------------------------------------------------
 
 def _is_human_only_reason(ready_reason: str) -> bool:
-    """True when a verify_ready failure names a HUMAN-ONLY marker (work-auth geography, a needs-Sam
-    field, or a degraded/unavailable judge). Such a stop is `blocked` — surface to Sam, never
+    """True when a verify_ready failure names a HUMAN-ONLY marker (work-auth geography, a needs-sam
+    field, or a degraded/unavailable judge). Such a stop is `blocked` — surface to the user, never
     auto-fix. Independent of whether there are routable findings (a degraded judge has none)."""
     rr = (ready_reason or "").lower()
     return any(m in rr for m in _HUMAN_ONLY_REASON_MARKERS)
 
 
 def _is_human_only_finding(f: dict) -> bool:
-    """A finding the loop CANNOT fix by re-drafting (a fact only Sam has). Currently: an
+    """A finding the loop CANNOT fix by re-drafting (a fact only the user has). Currently: an
     unverifiable-claim fabrication finding whose fix would require INVENTING support (the ledger
     can't back it, so re-drafting can only remove the claim — that's still fixable; a truly human-
     only case is one explicitly flagged unverifiable/needs-confirmation). We keep this conservative:
@@ -464,8 +464,8 @@ def _is_human_only_finding(f: dict) -> bool:
 
 def _partition(findings: List[dict], ready_reason: str) -> Tuple[List[dict], List[dict]]:
     """Split blocking findings into (human_only, fixable). A verify_ready reason that names a human-
-    only marker (work-auth geography, a needs-Sam field, a degraded judge) makes the WHOLE round
-    human-only — the loop surfaces a blocker rather than trying to auto-fix something only Sam can
+    only marker (work-auth geography, a needs-sam field, a degraded judge) makes the WHOLE round
+    human-only — the loop surfaces a blocker rather than trying to auto-fix something only the user can
     resolve. Otherwise each finding is fixable-by-removal unless explicitly flagged human_only."""
     rr = (ready_reason or "").lower()
     if any(m in rr for m in _HUMAN_ONLY_REASON_MARKERS):
@@ -482,7 +482,7 @@ def _partition(findings: List[dict], ready_reason: str) -> Tuple[List[dict], Lis
 # How many INNER iterate-to-clean attempts the engine-own fix gives each finding. K≈3 (brief):
 # the regen re-prompts with the gate's specific complaint about its own previous attempt + the
 # ledger facts and tries again, so a fix that the gate keeps rejecting is given a bounded chance
-# to converge-by-removal before it surfaces a classified residual. Sam's dashboard edits never
+# to converge-by-removal before it surfaces a classified residual. the user's dashboard edits never
 # pass N>1 — only this engine-own path iterates.
 _OWN_FIX_MAX_ATTEMPTS = 3
 
@@ -736,12 +736,12 @@ def _write_human_blocker(manifest_path: Path, job_id: str, blocker: dict) -> Non
 _STAGE_SUCCESS = {"ready_to_submit"}
 
 # Residual classes the inner iterate-to-clean loop produces (mirrors iterate_fix). human_only is a
-# fact only Sam has (-> answerable blocker); unsupportable is a premise that can't be grounded
+# fact only the user has (-> answerable blocker); unsupportable is a premise that can't be grounded
 # (-> rewrite-or-drop blocker). A residual is only present when a fix exhausted its K attempts.
 _RESIDUAL_HUMAN_ONLY = "human_only"
 _RESIDUAL_UNSUPPORTABLE = "unsupportable"
 # A G2 length fix that could not reach the stated range with supported facts. NOT human_only — a
-# length miss never needs a fact only Sam has; it surfaces as "couldn't reach the length".
+# length miss never needs a fact only the user has; it surfaces as "couldn't reach the length".
 _RESIDUAL_LENGTH_UNMET = "length_unmet"
 
 
@@ -774,7 +774,7 @@ def _dominant_residual(classes: List[str]) -> Optional[str]:
 
 def _residual_blocker_text(residual: Optional[str]) -> Tuple[str, str]:
     """Map a dominant residual class to (blocker_reason, category) for an exhausted stop. This is the
-    upgrade from the blunt 'convergence stalled': a human_only residual asks Sam a concrete
+    upgrade from the blunt 'convergence stalled': a human_only residual asks the user a concrete
     question (answerable); an unsupportable residual tells him to rewrite or drop the content; a
     length_unmet residual says the answer couldn't reach the form's required length with supported
     facts (a review/rewrite case — explicitly NOT 'needs your call'). With no residual we keep the
@@ -805,7 +805,7 @@ def converge_quality(job_id: str, *, audit_fn: Optional[Callable] = None,
     Behaviour (the HARD contract, feedback_apply_autonomous_quality_loop):
       1. GUARD — only on stage-success; skip a record already in a clean terminal convergence state
          (converged/quality_converged — re-stage does NOT re-run, §1b); acquire the FILE-BASED
-         converge_lock; refuse if a Sam edit is mid-flight (is_edit_in_flight).
+         converge_lock; refuse if a user edit is mid-flight (is_edit_in_flight).
       2. BLOCK LOOP rounds 1..max_rounds: collect fab BLOCKs + calib BLOCKs + length. These converge
          BY REMOVAL — the hard floor. Quality 4-dim FLAGs do NOT drive THIS loop.
       3. HARD FLOOR CLEARED — no blocks AND verify_ready PASS → hand to the QUALITY DRIVE (step 8).
@@ -815,7 +815,7 @@ def converge_quality(job_id: str, *, audit_fn: Optional[Callable] = None,
          by inventing, §6 #10). STRICT-SHRINK by block identity → exhausted on a true stall.
       6. CAP reached → re-audit once; hand to the quality drive if clear, else exhausted.
       7. NON-RAISING — any crash → state:error + blocker; never crash the stage.
-      8. QUALITY DRIVE (_run_quality_drive) — Sam's 2026-06-14 reasoned-convergence correction.
+      8. QUALITY DRIVE (_run_quality_drive) — the 2026-06-14 reasoned-convergence correction.
          LOOP applying grounded quality-dim fixes (score<=3 + concrete fix) via quality_fix_fn,
          re-judging via quality_judge_fn each round, UNTIL one of FOUR stop conditions:
            (1) CONVERGED — no low groundable dim remains → state:converged.
@@ -877,7 +877,7 @@ def converge_quality(job_id: str, *, audit_fn: Optional[Callable] = None,
     conv0 = rec0.get("convergence") if isinstance(rec0.get("convergence"), dict) else {}
     if conv0.get("state") in ("converged", "quality_converged"):
         return str(conv0["state"])
-    # ---- GUARD 2: a Sam edit mid-flight -> do NOT race it (refuse/skip) ----
+    # ---- GUARD 2: a user edit mid-flight -> do NOT race it (refuse/skip) ----
     if is_edit_in_flight(rec0):
         return "skipped"
 
@@ -969,15 +969,15 @@ def _run_loop(job_id, manifest_path, audit_fn, fix_fn, max_rounds, notify_fn,
 
         # ---- HARD FLOOR CLEARED: zero BLOCK-class findings AND verify_ready PASS (the SINGLE
         # authority, §6 #11). The package is now SUBMITTABLE. But "submittable" is not yet "the BEST
-        # honest package" — hand off to the QUALITY-DIMENSION drive (Sam's reasoned-convergence
+        # honest package" — hand off to the QUALITY-DIMENSION drive (the reasoned-convergence
         # correction) which iterates grounded quality fixes to the grounded ceiling. The drive owns
         # the terminal state from here (converged / quality_converged / blocked / exhausted). ----
         if not blocks and ready:
             return _run_quality_drive(job_id, manifest_path, quality_fix_fn, quality_judge_fn,
                                       notify_fn, block_rounds=rnd)
 
-        # ---- HUMAN-ONLY stop: verify_ready FAILS for a reason that is a fact only Sam has
-        # (work-auth geography, a needs-Sam field) OR a degraded/unavailable judge (§6 #13). This
+        # ---- HUMAN-ONLY stop: verify_ready FAILS for a reason that is a fact only the user has
+        # (work-auth geography, a needs-sam field) OR a degraded/unavailable judge (§6 #13). This
         # is checked BEFORE the fixable partition AND independent of whether there are routable
         # findings — a degraded judge produces a verify_ready FAIL with NO BLOCK findings, and it must
         # still surface as `blocked`, never spin a fix or fall through to exhausted. ----
@@ -992,11 +992,11 @@ def _run_loop(job_id, manifest_path, audit_fn, fix_fn, max_rounds, notify_fn,
 
         # Otherwise partition the routable BLOCK findings into human_only vs fixable. (A non-human-
         # only verify_ready failure with no routable findings — e.g. a G-gate the loop can't clear —
-        # falls through to the `not fixable` exhausted branch below: it belongs to Sam / a watched
+        # falls through to the `not fixable` exhausted branch below: it belongs to the user / a watched
         # run, not an auto-fix.)
         human_only, fixable = _partition(blocks, ready_reason if not ready else "")
 
-        # ---- HUMAN-ONLY blocker from the findings themselves: a fact only Sam has -> surface ----
+        # ---- HUMAN-ONLY blocker from the findings themselves: a fact only the user has -> surface ----
         if human_only and not fixable:
             blocker = _build_human_blocker(job_id, human_only, ready_reason)
             _set_convergence(manifest_path, job_id, state="blocked", rounds=rnd,
@@ -1024,7 +1024,7 @@ def _run_loop(job_id, manifest_path, audit_fn, fix_fn, max_rounds, notify_fn,
         # too-short "Why Anthropic?" resolved the length-block but the padding introduced a
         # fabrication-block. Count stayed 1->1, but the length issue is GONE and the new fab is
         # itself fixable next round — that is progress, NOT a stall. The blunt count check exhausted
-        # here and dumped a fixable card on Sam. Identity tracking lets the loop fix the new block
+        # here and dumped a fixable card on the user. Identity tracking lets the loop fix the new block
         # on the next round; the round CAP bounds any introduce/resolve oscillation. A TRUE stall
         # (the previous round's fix resolved NOTHING — same blocks persist) still exhausts. ----
         cur_sigs = frozenset(_block_sig(f) for f in blocks)
@@ -1034,7 +1034,7 @@ def _run_loop(job_id, manifest_path, audit_fn, fix_fn, max_rounds, notify_fn,
             # The previous round's fix resolved none of its blocks -> a genuine stall (not a
             # block-type swap). Stop rather than spin the cap. The residual class from the LAST
             # round's iterate-to-clean fixes (if any) names WHY each fix could not converge:
-            # human_only (a fact only Sam has -> answerable) vs unsupportable (rewrite-or-drop).
+            # human_only (a fact only the user has -> answerable) vs unsupportable (rewrite-or-drop).
             reason, category = _residual_blocker_text(last_fix_residual)
             blocker = _build_human_blocker(job_id, blocks, reason)
             blocker["category"] = category
@@ -1132,7 +1132,7 @@ def _quality_history_row(rnd: int, scores: dict, low: List[dict], applied: List[
 
 def _run_quality_drive(job_id, manifest_path, quality_fix_fn, quality_judge_fn, notify_fn,
                        *, block_rounds: int) -> str:
-    """The QUALITY-DIMENSION drive — REASONED CONVERGENCE to the BEST HONEST package (Sam's
+    """The QUALITY-DIMENSION drive — REASONED CONVERGENCE to the BEST HONEST package (the
     2026-06-14 correction; REPLACES the prior "exactly one pass"). Entered ONLY once the BLOCK-class
     floor is clear AND verify_ready PASSES (the package is already submittable). It LOOPS applying
     grounded quality-dimension fixes (dims scoring <= _QUALITY_LOW_CEILING with a concrete `fix`),

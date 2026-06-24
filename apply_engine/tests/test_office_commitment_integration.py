@@ -1,7 +1,7 @@
 """Real-Playwright integration: screen-clearing commitment questions get answered Yes + VERIFIED
 on BOTH widget styles (button-group + react-select), while an EEO control is never driven.
 
-Policy 2026-06-09: relocation is now AUTO_YES (Sam is open to relocation), joining the same
+Policy 2026-06-09: relocation is now AUTO_YES (the applicant is open to relocation), joining the same
 screen-clearing bucket as in-office/RTO — so the office guard answers office AND relocation Qs.
 Only EEO/demographic stays untouched. Runs against fixtures/office_commitment_form.html, which
 carries 3 office Qs (2 button-group + 1 react-select), 2 relocation Qs (button + react-select),

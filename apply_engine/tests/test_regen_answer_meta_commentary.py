@@ -115,7 +115,7 @@ def test_meta_commentary_blocked_prior_answer_preserved(tmp_path, monkeypatch):
     assert q["value"] == REAL_ORIGINAL
     assert META not in q["value"]
     assert "No edit needed" not in q["value"]
-    # Flagged for Sam, not silently "drafted".
+    # Flagged for the user, not silently "drafted".
     assert q["status"] == "needs_input"
     assert "commentary" in (q.get("reason", "") or "").lower()
     # Re-prompted exactly once (two generation attempts), and the re-prompt carried a stronger

@@ -75,7 +75,7 @@ def test_canonical_upload_path_passes_through_already_canonical(tmp_path):
 
 def test_build_answers_uploads_canonical_resume_from_company_named_source(profile, tmp_path):
     """The on-disk source name (Scale_Resume.pdf / Company_Cover.pdf) is NOT what gets uploaded —
-    the canonical SAM_RIVERA_* names are. This is the recruiter-visible filename contract."""
+    the canonical APPLICANT_* names are. This is the recruiter-visible filename contract."""
     resume = tmp_path / "Scale_Resume.pdf"
     resume.write_bytes(b"%PDF-1.4 resume")
     cover = tmp_path / "Company_Cover.pdf"

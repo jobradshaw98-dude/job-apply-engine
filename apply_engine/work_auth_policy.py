@@ -8,7 +8,7 @@ classifier alone could not cover:
      The fix is to compute the answer from POLICY every time, never from a possibly-corrupt
      staged value.
   2. A role based in a DIFFERENT country (Cresta = "Australia (Remote)") was auto-answered "Yes,
-     authorized" — but Sam is authorized in the US (TN), NOT in Australia. Auto-clearing a
+     authorized" — but the applicant is authorized in their home country, NOT in Australia. Auto-clearing a
      foreign work-auth screen is a TRUTHFULNESS violation. A foreign role is a HUMAN-ONLY blocker
      (answerable tier), never an auto-Yes.
 
@@ -31,7 +31,7 @@ flags; explain nuance to a human later; NEVER surface GC/marriage context anywhe
 emits only Yes/No decisions and a NEEDS_HUMAN signal — it never writes any private context.
 
 PURE: no browser, no I/O, no clock. The caller (orchestrator) drives the widget + builds the
-human_blocker; this module only decides WHAT the answer is (or that only Sam can give it).
+human_blocker; this module only decides WHAT the answer is (or that only the user can give it).
 """
 from enum import Enum
 from typing import Optional
@@ -158,9 +158,9 @@ def resolve_work_auth(question_text: str, role_location: Optional[str]) -> WorkA
     if decision == WorkAuthDecision.HALT:
         return WorkAuthResolution.NEEDS_HUMAN
 
-    # This is a sponsorship/authorization SCREEN. The locked answer only applies where Sam is
+    # This is a sponsorship/authorization SCREEN. The locked answer only applies where the applicant is
     # actually authorized (US, TN). For a role based abroad, auto-answering "Yes, authorized" is a
-    # truthfulness violation -> hand the whole question to Sam (answerable human_blocker).
+    # truthfulness violation -> hand the whole question to the user (answerable human_blocker).
     geo = classify_role_location(role_location)
     if geo == "foreign":
         return WorkAuthResolution.NEEDS_HUMAN

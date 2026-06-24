@@ -10,13 +10,13 @@ The dropdown analog of answer_gen. Two safety layers, both injectable for testin
 Hard safety property: the returned value is ALWAYS one of the offered options (matched
 case/whitespace-insensitively) or "". The model can never invent an option, and a pick
 with no factual basis DECLINEs — so judgment-call dropdowns ("how familiar are you with
-X") are left for Sam, by construction, not by hope.
+X") are left for the user, by construction, not by hope.
 
 Status per choice:
   answered  : the model picked an offered option, supported, passed the gate (safe to select)
   declined  : DECLINE, an invented/unmatched option, an empty option list, or an llm error
-              (left for Sam)
-  blocked   : the gate flagged the chosen option text (left for Sam)
+              (left for the user)
+  blocked   : the gate flagged the chosen option text (left for the user)
 """
 from dataclasses import dataclass, field
 from typing import List
@@ -36,7 +36,7 @@ class Choice:
 def build_choice_prompt(question: str, options: List[str], facts: str) -> str:
     opts = "\n".join(f"- {o}" for o in options)
     return (
-        "You are choosing Sam Rivera's answer to a job-application question that has a\n"
+        "You are choosing the applicant's answer to a job-application question that has a\n"
         "FIXED set of options. Use ONLY the FACTS below.\n"
         "HARD RULES:\n"
         "- Return EXACTLY ONE of the OPTIONS, copied verbatim. Nothing else.\n"
@@ -120,7 +120,7 @@ class MultiChoice:
 def build_multi_choice_prompt(question: str, options: List[str], facts: str) -> str:
     opts = "\n".join(f"- {o}" for o in options)
     return (
-        "You are choosing Sam Rivera's answer to a job-application question that lets\n"
+        "You are choosing the applicant's answer to a job-application question that lets\n"
         "you select MULTIPLE options ('check all that apply'). Use ONLY the FACTS below.\n"
         "HARD RULES:\n"
         "- Return the SUBSET of the OPTIONS that the FACTS clearly support — each on its own\n"

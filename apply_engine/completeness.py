@@ -1,5 +1,5 @@
 """Completeness + attachment checks so 'ready_to_submit' can never hide a blank
-required field. Answers Sam's rule: ensure all fields are filled — or report
+required field. Answers the user's rule: ensure all fields are filled — or report
 exactly which required ones still need him.
 
 Covers native fillable controls (text/textarea/select/checkbox/radio) + resume file
@@ -209,7 +209,7 @@ def unfilled_required(page) -> List[str]:
     Radio groups are handled by NAME (satisfied when ANY radio in the group is checked) and
     reported by their recovered QUESTION label, not the raw field name. A naive per-input scan
     flags every unchecked sibling radio of an answered group as 'missing' — which is exactly
-    why a correctly-answered Lever work-auth radio still showed up under 'needs Sam'."""
+    why a correctly-answered Lever work-auth radio still showed up under 'needs the user'."""
     missing: List[str] = []
     radio_names: List[str] = []
     for el in page.query_selector_all("input, textarea, select"):

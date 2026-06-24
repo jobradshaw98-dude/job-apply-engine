@@ -7,7 +7,7 @@ WHY (root cause): the apply RUN records only the files it attached live
 /career build pipeline or a dashboard content edit — is never added to uploaded_docs. So a real
 tailored cover sits on disk in applications/<APP-ID>-<slug>/ while uploaded_docs lists resume only.
 finish._resolve_pdfs then returns cover=None and the engine silently submits resume-only, dropping
-Sam's tailored cover (a quality-contract breach), and the open/fill path can error on it.
+the applicant's tailored cover (a quality-contract breach), and the open/fill path can error on it.
 
 This backfill makes the on-disk truth explicit so the durable resolver and the submit gate both see
 the tailored cover. It reuses finish._resolve_doc_pdf (registered path, then the sibling-dir tailored

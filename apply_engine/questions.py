@@ -1,6 +1,6 @@
 """Extract CUSTOM application questions (free-text essays + short-text) that the
 standard field map didn't cover, so they can be answer-drafted. Y/N and dropdown
-custom questions are intentionally left for Sam (quick taps + role-fit judgment)."""
+custom questions are intentionally left for the user (quick taps + role-fit judgment)."""
 import re
 from dataclasses import dataclass, field
 from typing import List
@@ -9,7 +9,7 @@ from .field_map import map_field
 from .work_auth import classify_work_auth, WorkAuthDecision
 
 
-# Protected-class self-ID (EEO) questions are NEVER auto-answered — left for Sam,
+# Protected-class self-ID (EEO) questions are NEVER auto-answered — left for the user,
 # exactly like work-auth. Live Lever keys them by name="eeo[...]"; we also match on the
 # label so a demographic question without the eeo[ name prefix is still caught.
 _EEO_LABEL = re.compile(
@@ -97,7 +97,7 @@ def extract_questions(page, limit: int = 15) -> List[Question]:
         # work-auth questions are handled by the work-auth guard — never draft those
         if classify_work_auth(label) != WorkAuthDecision.UNRELATED:
             continue
-        # EEO / demographic self-ID — never auto-answered, left for Sam
+        # EEO / demographic self-ID — never auto-answered, left for the user
         if _is_eeo(name, label):
             continue
         # standard fields (city/linkedin/etc.) are handled by fill_remaining — skip them;
@@ -147,7 +147,7 @@ def _custom_select_label(page, el):
     if classify_work_auth(label) != WorkAuthDecision.UNRELATED:
         return None  # work-auth guard owns this one
     if _is_eeo(el.get_attribute("name") or "", label):
-        return None  # protected-class self-ID — left for Sam, never auto-answered
+        return None  # protected-class self-ID — left for the user, never auto-answered
     if map_field(label, el.get_attribute("name") or "",
                  el.get_attribute("placeholder") or ""):
         return None  # standard field (country/state/...) handled elsewhere
@@ -393,7 +393,7 @@ def _name_grouped_checkboxes(page) -> List[CheckboxGroup]:
         if classify_work_auth(label) != WorkAuthDecision.UNRELATED:
             continue  # work-auth guard owns it
         if _is_eeo(name, label):
-            continue  # protected-class self-ID — left for Sam
+            continue  # protected-class self-ID — left for the user
         if not _name_group_required(page, boxes[0]):
             continue
         options: List[str] = []

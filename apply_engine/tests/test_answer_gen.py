@@ -199,7 +199,7 @@ def test_refine_failure_falls_back_to_draft():
 
 
 def test_commitment_questions_detected():
-    # GENUINE personal commitments only Sam can answer -> still declined
+    # GENUINE personal commitments only the user can answer -> still declined
     assert is_personal_commitment("What is your expected salary?")
     assert is_personal_commitment("What is your earliest start date?")
     assert is_personal_commitment("Are you able to travel up to 25%?")
@@ -251,7 +251,7 @@ def test_commitment_question_declined_without_llm():
     assert a.status == "declined"
     assert "commitment" in a.reason.lower()
     assert calls == []          # the model was never asked
-    assert a.value == ""        # nothing filled — left blank for Sam
+    assert a.value == ""        # nothing filled — left blank for the user
 
 
 def test_later_answers_see_prior_examples_for_diversity():
@@ -384,7 +384,7 @@ def test_single_call_repair_retry_on_bad_json():
 def test_single_call_escalates_after_double_parse_failure():
     out = draft_single_call([_q("Q1", "essay"), _q("Q2", "essay")], "FACTS",
                             lambda p: "still not json", lambda t: [])
-    assert all(a.status == "declined" and "needs Sam" in a.reason for a in out)
+    assert all(a.status == "declined" and "needs the user" in a.reason for a in out)
 
 
 def test_single_call_skips_personal_commitment_without_model():

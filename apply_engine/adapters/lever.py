@@ -4,7 +4,7 @@ The application form lives at <posting-url>/apply. Standard fields are targeted 
 `name` attribute (Lever inputs have no id): name/email/phone, plus urls[LinkedIn] and
 the resume file input #resume-upload-input. Custom per-job questions (university,
 veteran/disability, and any work-auth) are native <select>s in cards[...]; work-auth
-ones are answered by FormAdapterBase, the rest are left for Sam at review."""
+ones are answered by FormAdapterBase, the rest are left for the user at review."""
 from .base import FormAdapterBase
 
 

@@ -113,7 +113,7 @@ def test_unknown_severity_defaults_to_flag():
 
 
 def test_transition_blocked_to_pass_when_findings_resolved():
-    # Same answers, but now NOTHING is flagged (Sam fixed them) -> PASS.
+    # Same answers, but now NOTHING is flagged (the user fixed them) -> PASS.
     out = audit_answers(_drafts("now a clean answer"),
                         gate_fn=lambda t: [], llm=lambda p: "[]", ledger="LEDGER")
     assert out["verdict"] == "PASS"

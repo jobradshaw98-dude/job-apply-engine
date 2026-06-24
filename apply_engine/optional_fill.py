@@ -3,12 +3,12 @@
 
 WHY THIS EXISTS (feedback_apply_answer_every_field, design doc §8.2 G5): the engine fills
 required + known-mapped fields, but leaves OPTIONAL free-text and EEO/self-ID widgets blank. A
-blank optional reads as a lazy autopilot submit; Sam wants every application to look like he
+blank optional reads as a lazy autopilot submit; the user wants every application to look like he
 sat down and filled the whole thing. This pass runs AFTER the required-field fill and fills any
 STILL-EMPTY optional/EEO field from a stored profile.
 
 WHAT IT FILLS (only when the field is present + still empty):
-  * EEO / voluntary self-ID — gender / race / hispanic / veteran / disability. These are Sam's
+  * EEO / voluntary self-ID — gender / race / hispanic / veteran / disability. These are the user's
     REAL, confirmed values (gender=Male, race=White, hispanic=No, veteran="not a protected
     veteran"), disability=decline. Disclosed where the profile discloses; a decline-style option
     otherwise. Truthful — never asserts a value the profile doesn't hold.
@@ -20,7 +20,7 @@ WHAT IT FILLS (only when the field is present + still empty):
 HARD RULES (the whole point of the design):
   * ADDITIVE / BEST-EFFORT: every action is wrapped so an optional-fill failure can NEVER fail the
     stage. A form with no optional fields behaves exactly as today.
-  * TRUTHFUL: EEO values come from the profile (Sam's real ones); website is never invented.
+  * TRUTHFUL: EEO values come from the profile (the user's real ones); website is never invented.
   * REQUIRED FIELDS ARE NOT TOUCHED: this pass only fills fields the form marks OPTIONAL (and EEO,
     which is voluntary). Required fields are owned by the normal fill/escalation path.
   * LIVE-DOM (feedback_apply_engine_live_dom_and_empty_guard): if a widget can't be driven, SKIP it

@@ -27,7 +27,7 @@ def _ashby_form(extra=None):
 
 _FILLED_RECORD = {
     "filled_fields": ["full_name", "email", "linkedin"],
-    "uploaded_docs": [{"doc": "resume", "name": "SAM_RIVERA_Resume.pdf"}],
+    "uploaded_docs": [{"doc": "resume", "name": "APPLICANT_Resume.pdf"}],
     "custom_qs": [],
     "work_auth": [],
 }

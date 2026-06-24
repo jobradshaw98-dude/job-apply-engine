@@ -100,13 +100,13 @@ def test_build_record_uploaded_docs_land_on_record():
     out = JobOutcome(
         job_id="JOB-1", status="needs_input",
         uploaded_docs=[{"doc": "resume",
-                        "path": "/career/Sam_Rivera_Resume_Master.pdf",
-                        "name": "Sam_Rivera_Resume_Master.pdf"}],
+                        "path": "/career/APPLICANT_Resume_Master.pdf",
+                        "name": "APPLICANT_Resume_Master.pdf"}],
     )
     rec = build_record(out, _job(), staged_at="t")
     assert rec["uploaded_docs"] == [
-        {"doc": "resume", "path": "/career/Sam_Rivera_Resume_Master.pdf",
-         "name": "Sam_Rivera_Resume_Master.pdf"}]
+        {"doc": "resume", "path": "/career/APPLICANT_Resume_Master.pdf",
+         "name": "APPLICANT_Resume_Master.pdf"}]
 
 
 def test_build_record_uploaded_docs_default_empty():

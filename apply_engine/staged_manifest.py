@@ -37,18 +37,18 @@ def _quality_blocks(record: dict) -> bool:
 
 
 def recompute_status(record: dict) -> str:
-    """Pure: return the status this record SHOULD carry given its STORED state, after Sam has
+    """Pure: return the status this record SHOULD carry given its STORED state, after the user has
     answered questions / provided inputs from the dashboard. Returns REVIEW_READY only when every
     stored blocker the orchestrator considered at staging is resolved; otherwise returns the
     record's CURRENT status unchanged.
 
     Blockers, mirrored from orchestrator's staging logic honestly:
       * any custom_q with status "needs_input" (a question that could not be drafted and still
-        needs Sam). Declined questions are NOT blockers — the engine intentionally stages them
-        for Sam and they never gated a clean form.
+        needs the user). Declined questions are NOT blockers — the engine intentionally stages them
+        for the user and they never gated a clean form.
       * any unresolved required question still listed in needs_sam (the orchestrator's
         `unfilled_required` list; legacy records used the `unfilled_required` key). --provide prunes
-        these as Sam answers them, so an empty list means nothing required is outstanding.
+        these as the user answers them, so an empty list means nothing required is outstanding.
       * an audit verdict of "BLOCKED" (a fabrication-class finding, or the fail-closed degraded
         stamp) or an audit with judge_ran explicitly False (a legacy degraded stamp) — never
         review-ready while set.
@@ -64,7 +64,7 @@ def recompute_status(record: dict) -> str:
     HONESTY: this can only see STORED state — it does NOT re-open the live form. That is acceptable
     because finish.replay re-fills and finish.can_submit re-verifies the live form (read-back +
     a live can_submit re-check) before any submit click. The live form is the durable gate; this
-    function only unlocks the dashboard's review step so Sam can reach that gate. A record is
+    function only unlocks the dashboard's review step so the user can reach that gate. A record is
     never made review-ready here without the live re-verification still standing between it and a
     submit."""
     if not isinstance(record, dict):
@@ -95,7 +95,7 @@ def _stage_blocker(record: dict) -> Optional[str]:
     """Return a short reason string for the FIRST unresolved staging blocker on this record, or
     None if the stored state clears every gate finish.can_submit checks. Pure (reads stored state
     only). Used by recompute_status in both directions (unlock when None, downgrade when set)."""
-    # blocker 1: a custom_q that still needs Sam (failed draft). declined != blocker.
+    # blocker 1: a custom_q that still needs the user (failed draft). declined != blocker.
     for q in (record.get("custom_qs") or []):
         if isinstance(q, dict) and q.get("status") == "needs_input":
             return "custom_q needs_input"
@@ -236,7 +236,7 @@ def build_record(outcome, job: dict, staged_at: str) -> dict:
     job = job or {}
     needs_sam = list(getattr(outcome, "unfilled_required", []) or [])
     halt = getattr(outcome, "halt_reason", "") or ""
-    # surface a needs-Sam reason that isn't already a field (e.g. work-auth halt)
+    # surface a needs-sam reason that isn't already a field (e.g. work-auth halt)
     if halt and getattr(outcome, "status", "") in ("needs_sam", "error") and not needs_sam:
         needs_sam = [halt]
 

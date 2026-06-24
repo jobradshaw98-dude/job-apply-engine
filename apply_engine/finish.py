@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Finish a STAGED application: re-open the form, deterministically re-fill the EXACT
-stored answers, then either leave the browser on the review screen for Sam or click
+stored answers, then either leave the browser on the review screen for the user or click
 the ATS submit control.
 
 This is the ONLY module in the engine permitted to click a submit control, and only on
@@ -86,7 +86,7 @@ def _had_unanswered_work_auth(record: dict) -> bool:
     only signals available on a flat record are the human-facing reason fields, which the
     orchestrator fills with the literal question text on a work-auth HALT. We refuse if any
     of those reasons classifies as a real work-auth question — a work-auth question slipped
-    through to Sam means it was never given a no-red-flag answer."""
+    through to the user means it was never given a no-red-flag answer."""
     reasons = list(record.get("needs_sam") or [])
     halt = record.get("halt_reason") or ""
     if halt:
@@ -106,11 +106,11 @@ def can_submit(record: dict) -> Tuple[bool, str]:
     if record.get("submitted"):
         return False, "already submitted"
 
-    # AUTOMATED CONTENT GATE = the DETERMINISTIC gate ONLY (2026-06-22, Sam's call). The LLM
+    # AUTOMATED CONTENT GATE = the DETERMINISTIC gate ONLY (2026-06-22). The LLM
     # accuracy-review + holistic quality judge were demoted from required submit-blockers to
     # advisory/on-demand: the hardened engine already produces clean, self-critiqued content, the
     # cheap deterministic gate is the hard backstop (and re-runs on every per-element edit), and
-    # Sam's own review is the quality gate. So a stale or absent LLM verdict no longer blocks —
+    # the user's own review is the quality gate. So a stale or absent LLM verdict no longer blocks —
     # only a live DETERMINISTIC gate block (forbidden phrase / fabrication pattern on the current
     # answers) does. This removes the quota burn + the stale-verdict batch-restage treadmill while
     # keeping the part that actually catches junk. (LLM judges still run on-demand via the
@@ -135,18 +135,18 @@ def can_submit(record: dict) -> Tuple[bool, str]:
 
     unfilled = list(record.get("unfilled_required") or record.get("needs_sam") or [])
     if unfilled:
-        return False, f"{len(unfilled)} required field(s) still need Sam: " \
+        return False, f"{len(unfilled)} required field(s) still need the user: " \
                       + "; ".join(str(u) for u in unfilled[:8])
 
     # work-auth: every stored answer must be a no-red-flag answer, and no work-auth
-    # question may have been left unanswered (slipped through to Sam).
+    # question may have been left unanswered (slipped through to the user).
     entries = _work_auth_entries(record)
     for e in entries:
         if not isinstance(e, dict) or not _work_auth_answer_ok(e):
             saw = e.get("answer") if isinstance(e, dict) else e
             return False, f"work-auth answer is not a no-red-flag answer (saw: {saw!r})"
     if _had_unanswered_work_auth(record):
-        return False, "a work-auth question was left unanswered — needs Sam, never auto-submit"
+        return False, "a work-auth question was left unanswered — needs the user, never auto-submit"
 
     return True, ""
 
@@ -155,7 +155,7 @@ def _lingering_edit_request(record: dict) -> bool:
     """True if any stored custom_q still carries a non-empty `edit_request` — an AI rewrite that
     is in flight / awaiting re-review (regen_answer sets it when a dashboard regen launches and
     clears it on every terminal outcome). Submitting on top of an unsettled edit would ship a
-    half-applied answer, so the invariant gate blocks it. A Sam-provided answer deliberately
+    half-applied answer, so the invariant gate blocks it. A user-provided answer deliberately
     leaves edit_request empty, so it never trips this."""
     for q in (record.get("custom_qs") or record.get("generated") or []):
         if isinstance(q, dict) and (q.get("edit_request") or "").strip():
@@ -179,7 +179,7 @@ def verify_submittable(record: dict, config) -> Tuple[bool, list]:
       4. The quality audit verdict in {PASS, FLAG} and judge_ran is not False (a missing/None
          quality_audit fails here with a clear reason — the FINDING #3 wedge).
       5. Work-auth answers carry no red flag.
-      6. No unfilled required fields, no work-auth question left for Sam, and no custom_q still
+      6. No unfilled required fields, no work-auth question left for the user, and no custom_q still
          carrying an in-flight edit_request.
 
     Invariants 3-6 reuse the EXACT logic in can_submit (the single source of truth for those
@@ -721,7 +721,7 @@ def replay(record: dict, page, answers, adapter, *, submit: bool) -> dict:
         else:
             # a HALT-class work-auth question reappearing means this is not safe to finish.
             return {"ok": False, "submitted": False,
-                    "reason": f"work-auth question needs Sam: {q.label}",
+                    "reason": f"work-auth question needs the user: {q.label}",
                     "refilled": result["refilled"], "unmatched_custom": []}
         # the answer call returns a VERIFIED bool — abort the finish if it did not register,
         # never proceed toward submit with a silently-blank work-auth field.
@@ -751,7 +751,7 @@ def replay(record: dict, page, answers, adapter, *, submit: bool) -> dict:
 
     if not submit:
         result["opened"] = True
-        return result  # leave the page on review for Sam — do NOT close
+        return result  # leave the page on review for the user — do NOT close
 
     # ---- SUBMIT branch: the ONE place a submit click is allowed ----
     ok, reason = can_submit(record)           # live re-check just before the click
@@ -986,7 +986,7 @@ def finish_job(job_id: str, *, submit: bool, headless: bool, runs_root,
 
             # The launch_profile context manager closes the browser the moment this block
             # exits (and a detached process exiting kills Chrome too) — that was the "filled
-            # then suddenly closed" bug, which also stopped Sam SEEING a submit's result.
+            # then suddenly closed" bug, which also stopped the user SEEING a submit's result.
             # Hold the browser open here for BOTH modes: --open (review the fill) and --submit
             # (see whether the confirmation page actually appeared, especially when the engine
             # reports submitted=False). Interactive run waits for Enter; a detached run (no
@@ -1059,7 +1059,7 @@ def _is_master_resume(path) -> bool:
     from pathlib import Path
     if not path:
         return False
-    return Path(str(path)).name.lower().startswith("sam_rivera_resume_master")
+    return Path(str(path)).name.lower().startswith("applicant_resume_master")
 
 
 def _uploaded_doc_path(record: dict, doc: str):
@@ -1079,11 +1079,11 @@ def _uploaded_doc_path(record: dict, doc: str):
 
 
 # Canonical tailored filenames the /career build pipeline emits into applications/<APP-ID>-<slug>/.
-# Mirrors cli.ensure_pdfs' accepted names (newer SAM_RIVERA_* form + older plain form). Kept
+# Mirrors cli.ensure_pdfs' accepted names (newer APPLICANT_* form + older plain form). Kept
 # here as the single tailored-name list the resolution fallback reads — do NOT fork a second scheme.
 _TAILORED_NAMES = {
-    "resume": ("SAM_RIVERA_Resume.pdf", "resume.pdf"),
-    "cover":  ("SAM_RIVERA_Cover_Letter.pdf", "cover.pdf"),
+    "resume": ("APPLICANT_Resume.pdf", "resume.pdf"),
+    "cover":  ("APPLICANT_Cover_Letter.pdf", "cover.pdf"),
 }
 
 

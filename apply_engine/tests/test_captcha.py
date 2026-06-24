@@ -3,7 +3,7 @@
 detect_captcha must recognize BLOCKING captchas (hCaptcha, a VISIBLE reCAPTCHA challenge)
 so the orchestrator/finish divert to a manual submit, while IGNORING the invisible reCAPTCHA
 that Greenhouse/Ashby drop on every form (a bare hidden g-recaptcha-response textarea) — if
-that tripped the check, nearly every application would be falsely diverted to Sam.
+that tripped the check, nearly every application would be falsely diverted to the user.
 
 Real-Playwright against local HTML fixtures, matching test_react_select_modern.py style."""
 from apply_engine.browser import launch_profile

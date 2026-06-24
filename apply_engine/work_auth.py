@@ -7,13 +7,13 @@ Locked rules (2026-05-31, combined-question hardening 2026-06-01):
      requiring sponsorship?"          (answer the no-red-flag option: Yes to
                                        "authorized without sponsorship" / No to
                                        "do you require sponsorship") — do NOT halt
-  - citizenship / nationality     -> HALT (factual, Canadian; hand to Sam)
+  - citizenship / nationality     -> HALT (factual, Canadian; hand to the user)
   - free-text visa / ambiguous    -> HALT
   - unrelated                     -> UNRELATED (caller handles normally)
 
 Per feedback_work_auth_answer_policy: always clear the initial screen with no
 immigration red flags; the nuance is explained to a human later. Pure function — the
-caller halts the run on HALT and surfaces the exact question to Sam.
+caller halts the run on HALT and surfaces the exact question to the user.
 """
 import re
 from enum import Enum
@@ -120,7 +120,7 @@ def classify_work_auth(question: str) -> WorkAuthDecision:
     has_auth = any(k in t for k in _AUTHORIZED)
     has_visa = any(k in t for k in _VISA)
 
-    # 1. citizenship/nationality always halts (factual, not a fixed yes/no for Sam)
+    # 1. citizenship/nationality always halts (factual, not a fixed yes/no for the user)
     if has_citizen:
         return WorkAuthDecision.HALT
 

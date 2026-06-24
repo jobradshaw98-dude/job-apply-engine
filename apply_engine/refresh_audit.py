@@ -5,7 +5,7 @@ overwrite the stored verdict.
 WHY THIS EXISTS
 The career-draft-auditor stamps `record["audit"] = {verdict, gate_blocks, findings, summary}`
 at staging time. `finish.can_submit` refuses to submit while that verdict is "BLOCKED". But the
-verdict is FROZEN at staging — once Sam edits/fixes the offending answers, the stored verdict
+verdict is FROZEN at staging — once the user edits/fixes the offending answers, the stored verdict
 is stale and keeps Submit locked even though the findings are resolved. This module re-runs the
 SAME audit over the answers AS THEY STAND NOW and writes a fresh verdict, so a resolved BLOCK
 flips to PASS (and an unresolved one stays BLOCKED).
@@ -30,7 +30,7 @@ HOW IT AUDITS (same two layers the engine + auditor use)
 
 TWO-SEVERITY VERDICT (2026-06-05 policy change)
 verdict == "BLOCKED" iff gate_blocks > 0 OR any finding has severity BLOCK; else "PASS".
-The findings list may be NON-EMPTY on a PASS — FLAG findings ride along visibly so Sam still
+The findings list may be NON-EMPTY on a PASS — FLAG findings ride along visibly so the user still
 sees the style notes, but they no longer lock Submit. Previously every finding was severity BLOCK
 and any finding ⇒ BLOCKED, which made PASS nearly unreachable: an LLM critic always finds
 something, so style opinions locked Submit with the same force as fabrications.
@@ -111,11 +111,11 @@ _LEDGER_PROSE_REST = (
     "Codex to ARIA, is a wrong-attribution BLOCK (a skills line may list both tools career-wide, "
     "but a specific Meridian accomplishment must credit Codex and an ARIA one Claude Code).\n"
     "  (f) NEVER-CLAIM PUFFERY: 'production multi-agent platform' / 'production agentic systems' / "
-    "'at platform scale' / 'deployed into real workflows' (ARIA serves ONE user — Sam), or "
+    "'at platform scale' / 'deployed into real workflows' (ARIA serves ONE user), or "
     "self-aggrandizing 'rare / unusual / uncommon combination', 'first-class', 'world-class' "
     "modifiers asserted without evidence.\n"
     "  (g) CODING-LANGUAGE FLUENCY: claims hand-coding PROFICIENCY in Python or MATLAB ('fluent in "
-    "Python', 'proficient in MATLAB', 'comfortable writing Python day to day'). Sam no longer "
+    "Python', 'proficient in MATLAB', 'comfortable writing Python day to day'). The applicant no longer "
     "hand-codes either — he BUILDS automation by ORCHESTRATING AI agents (Claude Code, Codex). "
     "Python may be named only as the language his AI-built tools are implemented in; MATLAB must "
     "not appear as a personal coding skill. A coding-fluency claim is a BLOCK.\n"
@@ -207,7 +207,7 @@ def _judge_answer(llm: Callable[[str], str], question: str, answer: str, ledger:
     is NOT a degradation: the judge ran and simply found nothing parseable, so we return [] —
     the deterministic gate remains the floor and the judgment lens contributed no findings."""
     raw = (llm(
-            "You are an honesty auditor for Sam Rivera's job-application answers. Below is his "
+            "You are an honesty auditor for the user Rivera's job-application answers. Below is his "
             "VETTED CLAIMS LEDGER (the complete set of claims he is allowed to make), the QUESTION "
             "he was asked, and his ANSWER. Identify every claim in the ANSWER — any number, metric, "
             "percentage, scope, tool, employer, outcome, or stated interest/affinity — that is NOT "
@@ -314,7 +314,7 @@ def audit_answers(drafts: List[dict], gate_fn: Optional[Callable[[str], list]],
             except Exception:  # noqa: BLE001 — a raised judge call degrades the lens, never crashes
                 judge_degraded = True
         # 3. DISCLOSURE lens (deterministic, no LLM). A ledger-grounded answer can be TRUTHFUL but
-        # still volunteer Sam's visa/citizenship/sponsorship/GC status — the fabrication judge
+        # still volunteer the applicant's visa/citizenship/sponsorship/GC status — the fabrication judge
         # passes it (it's true), but the work-auth policy forbids it in free-text content. Each hit
         # is a BLOCK finding so the verdict goes BLOCKED, the converge loop drives on it, and
         # verify_ready refuses the card until the disclosure is removed.
@@ -399,12 +399,12 @@ def audit_content_text(text: str, element: str, gate_fn: Optional[Callable[[str]
             })
     if llm is not None and ledger:
         # Count-as-impact ("10-person, two-hour review") is BLOCK on a RESUME bullet (percentage-only)
-        # but ALLOWED in cover prose — same as essay answers (2026-06-21 Sam). So the cover judge
+        # but ALLOWED in cover prose — same as essay answers (2026-06-21). So the cover judge
         # uses the ANSWERS rule string, matching make_audit_fn's deterministic gate; resume stays strict.
         prose_rules = LEDGER_PROSE_BLOCK_RULES_ANSWERS if doc == "cover" else LEDGER_PROSE_BLOCK_RULES
         try:
             raw = (llm(
-                "You are an honesty auditor for Sam Rivera's job-application documents. Below "
+                "You are an honesty auditor for the user Rivera's job-application documents. Below "
                 "is his VETTED CLAIMS LEDGER (the complete set of claims he is allowed to make) and "
                 "a just-edited resume/cover ELEMENT. Identify every claim in the ELEMENT — any "
                 "number, metric, percentage, scope, tool, employer, outcome, or stated interest — "
@@ -561,7 +561,7 @@ def refresh(job_id: str, manifest_path: Optional[Path] = None,
     (_content_edit_outdates_audit) compares the latest landed content edit against
     min(audit.refreshed_at, quality_audit.refreshed_at). A fabrication-only refresh advances only
     the first stamp, so the min() stayed pre-edit and the gate refused forever no matter how many
-    times Sam clicked Re-run accuracy review. With recheck_calibration=True, after the
+    times the user clicked Re-run accuracy review. With recheck_calibration=True, after the
     fabrication re-stamp we ALSO run the CALIBRATION-ONLY recheck (quality_judge.recheck_calibration
     — the SAME polish-dims-frozen path refresh_after_content_edit uses) and re-stamp
     quality_audit.refreshed_at. This respects the quality-once rule: the four polish dimension
@@ -587,7 +587,7 @@ def refresh(job_id: str, manifest_path: Optional[Path] = None,
 
     # Construct the real audit deps unless injected. Each is independent: a missing Claude CLI
     # disables only the judgment lens; the deterministic gate still runs. We never fall back to
-    # the metered API (Sam's hard rule) and never crash a review step.
+    # the metered API (the user's hard rule) and never crash a review step.
     if gate_fn is None:
         try:
             from .llm import make_audit_fn

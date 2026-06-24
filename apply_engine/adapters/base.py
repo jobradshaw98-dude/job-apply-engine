@@ -38,7 +38,7 @@ class Adapter(Protocol):
 
 
 class NeedsHumanLogin(Exception):
-    """Raised when authentication needs Sam (new account / verification / CAPTCHA)."""
+    """Raised when authentication needs the user (new account / verification / CAPTCHA)."""
 
 
 class FormAdapterBase:
@@ -391,7 +391,7 @@ class FormAdapterBase:
         they are deliberately excluded here to avoid double-handling.)
 
         These are the "3+ years experience?", "designed LLM apps?", "proficient in Python?" screens
-        the engine used to punt wholesale to Sam. The orchestrator runs each through the
+        the engine used to punt wholesale to the user. The orchestrator runs each through the
         conservative `resolve_with_screening` classifier (capabilities-grounded; EEO/sensitive/
         negation excluded INSIDE the classifier) and drives the answer via the SAME verified
         `answer_yes`/`answer_no` path. Work-auth and office-commitment questions are excluded (their
@@ -707,7 +707,7 @@ class FormAdapterBase:
         (Country/State) and custom questions by label substring, and 'country'/'state' would
         otherwise match a work-auth label like 'authorized to work in this country' (the real
         Country control may sit later in the DOM) — corrupting a work-auth answer. Work-auth is
-        owned by find_work_auth_questions; EEO is left for Sam."""
+        owned by find_work_auth_questions; EEO is left for the user."""
         sub = (label_substr or "").strip().lower()
         if not sub:
             return None

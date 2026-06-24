@@ -9,12 +9,12 @@ from typing import Optional
 
 
 # G6 — canonical recruiter-visible upload filenames (feedback_apply_doc_filenames). Every doc
-# uploaded to an ATS must carry Sam's name + the doc type, NEVER a temp/Company_*/resume.pdf
+# uploaded to an ATS must carry the applicant's name + the doc type, NEVER a temp/Company_*/resume.pdf
 # name (the uploaded basename is recruiter-visible on the ATS). The uploaded filename is the
 # on-disk basename everywhere (set_input_files / file-chooser use Path(path).name), so we enforce
 # the canonical name HERE, once, and every adapter attach inherits it.
-CANONICAL_RESUME_NAME = "SAM_RIVERA_Resume.pdf"
-CANONICAL_COVER_NAME = "SAM_RIVERA_Cover_Letter.pdf"
+CANONICAL_RESUME_NAME = "APPLICANT_Resume.pdf"
+CANONICAL_COVER_NAME = "APPLICANT_Cover_Letter.pdf"
 
 
 def canonical_upload_path(src, canonical_name: str) -> Path:

@@ -1,10 +1,10 @@
-"""Re-stage CONSUMES a Sam-provided answer instead of re-declining the question.
+"""Re-stage CONSUMES a user-provided answer instead of re-declining the question.
 
 The bug: when a card halts at needs_input because the engine declined a custom question,
-Sam supplies the answer via `regen_answer --provide`, which writes it onto the staged
+The user supplies the answer via `regen_answer --provide`, which writes it onto the staged
 record's custom_q (answered_by="sam"). On the NEXT stage the orchestrator re-extracted
 every question from the live form and re-ran the classifier, re-declining the same one ->
-the card could never reach the brink. The fix loads the prior record's Sam-provided
+the card could never reach the brink. The fix loads the prior record's user-provided
 answers at stage start and, in each custom-question handler, DRIVES the provided value into
 the live widget (verified-set discipline) and skips the classifier.
 
@@ -29,7 +29,7 @@ def answers(tmp_path):
 
 def _seed(monkeypatch, tmp_path, job_id, custom_qs):
     """Point config.ARIA_DATA at our own dir (overriding the autouse sandbox) and write a
-    prior staged record carrying the given Sam-provided custom_qs."""
+    prior staged record carrying the given user-provided custom_qs."""
     data_dir = tmp_path / "data"
     data_dir.mkdir()
     monkeypatch.setattr(config, "ARIA_DATA", data_dir)
@@ -45,7 +45,7 @@ def _decline_llm(prompt: str) -> str:
     return "DECLINE"
 
 
-# ── 1. react-select screening question with a Sam-provided answer is FILLED, not re-declined.
+# ── 1. react-select screening question with a user-provided answer is FILLED, not re-declined.
 def test_provided_react_select_is_filled_not_redeclined(
         fixture_server, answers, tmp_path, monkeypatch):
     job_id = "JOB-RS-PROVIDED"
@@ -70,7 +70,7 @@ def test_provided_react_select_is_filled_not_redeclined(
     assert fea["value"] == "Yes"
     assert fea.get("answered_by") == "sam"
     # THE FIX: the engine never halted ON the FEA question (no needs_sam escalation for it,
-    # no fill_error) — it consumed Sam's answer and drove the live widget. (The modern form
+    # no fill_error) — it consumed the user's answer and drove the live widget. (The modern form
     # also has required Country/State react-selects the bare test profile doesn't fill, so the
     # overall card stays needs_input on THOSE — that's unrelated to the question we provided.)
     assert out.submitted is False
@@ -79,7 +79,7 @@ def test_provided_react_select_is_filled_not_redeclined(
     assert "fea models" not in str(hb.get("question", "")).lower()
 
 
-# ── 1b. native <select> with a Sam-provided answer is selected, not re-declined.
+# ── 1b. native <select> with a user-provided answer is selected, not re-declined.
 def test_provided_native_select_is_filled_not_redeclined(
         fixture_server, answers, tmp_path, monkeypatch):
     job_id = "JOB-SEL-PROVIDED"
@@ -111,7 +111,7 @@ def test_provided_native_select_is_filled_not_redeclined(
     assert grp["values"] == ["English (ENG)"]
     assert grp.get("answered_by") == "sam"
     # THE FIX: neither provided custom question re-declined or re-escalated — both consumed
-    # Sam's answer and drove the live widgets. (This fixture has no file input, so the card
+    # the user's answer and drove the live widgets. (This fixture has no file input, so the card
     # still carries the pre-existing "Resume (did not attach)" blocker — unrelated to the fix.)
     assert out.submitted is False
     blockers = " ".join(str(m).lower() for m in (out.unfilled_required or []))

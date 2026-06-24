@@ -7,7 +7,7 @@ policy answers (work_auth.classify_work_auth) together with a GEOGRAPHY gate:
 
   * US-based (or unknown/sparse) role -> the no-red-flag answer (authorized=Yes, sponsorship=No).
   * a role based in a DIFFERENT country (Cresta "Australia (Remote)", London, Toronto) -> NEEDS_HUMAN
-    (Sam is authorized in the US under TN, NOT abroad — auto-Yes there is a truthfulness lie).
+    (the applicant is authorized at home, NOT abroad — auto-Yes there is a truthfulness lie).
   * citizenship/visa/ambiguous -> NEEDS_HUMAN regardless of geography.
 
 These tests PIN: the US no-red-flag answers, the sponsorship=No regression (the Scale bug), the
@@ -98,7 +98,7 @@ def test_unrelated_question_is_unrelated_regardless_of_location():
 
 def test_foreign_authorization_question_needs_human():
     """The Cresta case: an authorization question for an Australia-based role -> NEEDS_HUMAN, NOT
-    an auto-Yes (Sam's US TN does not authorize work in Australia)."""
+    an auto-Yes (the applicant's authorization does not extend to work in Australia)."""
     r = resolve_work_auth("Are you authorized to work in this country?", "Australia (Remote)")
     assert r == R.NEEDS_HUMAN
 

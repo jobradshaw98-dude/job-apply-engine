@@ -262,7 +262,7 @@ def test_wrapper_delegates_non_yesno_to_the_generic_picker():
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("q", [
-    # Sam 2026-06-09: coding questions are ANSWERED truthfully (Python via LLM harnesses), not
+    # 2026-06-09: coding questions are ANSWERED truthfully (Python via LLM harnesses), not
     # escalated. They must NOT be deterministically excluded — capabilities.md grounds the answer.
     "Are you proficient in Python?",
     "Do you have experience with Python?",

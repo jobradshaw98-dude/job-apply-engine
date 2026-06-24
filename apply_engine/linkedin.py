@@ -3,7 +3,7 @@ linkedin.com beyond reading the page already loaded by the caller.
 
 - Outbound 'Apply on company website' link -> return its href (a real ATS URL).
 - Otherwise assume in-platform Easy Apply -> return EASY_APPLY sentinel so the
-  orchestrator stages it for Sam to complete manually.
+  orchestrator stages it for the user to complete manually.
 """
 EASY_APPLY = "__EASY_APPLY__"
 

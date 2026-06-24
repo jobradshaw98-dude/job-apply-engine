@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tests for apply_engine.regen_answer's --provide mode (Sam's own answer).
+"""Tests for apply_engine.regen_answer's --provide mode (the user's own answer).
 
 What's proven here:
   1. --provide writes value + status=answered + answered_by=sam, clears reason/findings,
@@ -118,7 +118,7 @@ def test_provide_writes_answer_and_prunes_needs(tmp_path, monkeypatch):
     assert q.get("edit_request", "") == ""
     hist = q["edit_history"]
     assert hist[-1]["status"] == "provided"
-    assert hist[-1]["instruction"] == "(provided by Sam)"
+    assert hist[-1]["instruction"] == "(provided by the user)"
     assert hist[-1]["before"] == ""        # was None -> ""
     assert hist[-1]["after"] == "Yes"
     assert hist[-1]["ts"]
@@ -150,7 +150,7 @@ def test_provide_multi_value(tmp_path, monkeypatch):
 # ── 5. needs_sam-ONLY question (no custom_q) CREATES a custom_q + prunes ────
 
 def test_provide_needs_sam_only_creates_custom_q(tmp_path, monkeypatch):
-    """Audit J1: a question that exists ONLY in needs_sam must have Sam's answer STORED
+    """Audit J1: a question that exists ONLY in needs_sam must have the user's answer STORED
     as a new custom_q (so finish.replay re-types it), not silently discarded. The created entry
     carries the exact shape finish.match_custom_entry/_replay_custom can pick up."""
     mp = _seed_manifest(tmp_path)
@@ -174,7 +174,7 @@ def test_provide_needs_sam_only_creates_custom_q(tmp_path, monkeypatch):
     assert created["kind"] == "short_text"        # "Canada" is not yes/no
     h = created["edit_history"][-1]
     assert h["status"] == "provided"
-    assert h["instruction"] == "(provided by Sam)"
+    assert h["instruction"] == "(provided by the user)"
     assert h["before"] == ""
     assert h["after"] == "Canada"
     assert h["ts"]

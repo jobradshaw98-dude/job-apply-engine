@@ -3,7 +3,7 @@
 Locked rule (feedback_office_commitment_answer): in-office / hybrid / RTO / on-site
 commitment questions are ALWAYS answered **Yes** unless the role is remote — these are
 screen-out gates, and a "No" is a hard reject. So they must be auto-answered, never
-escalated to Sam (live staging runs repeatedly escalated them, e.g. "Are you able to
+escalated to the user (live staging runs repeatedly escalated them, e.g. "Are you able to
 come into the office four days per week?", "Are you open to working in-person ... 25% of
 the time?").
 
@@ -12,15 +12,15 @@ off of, halting only if the set fails. It is deliberately a TIGHT allow-list —
 auto-Yes here is a serious error, so anything outside the allow-list returns UNRELATED
 (the caller leaves it to escalate).
 
-RELOCATION (policy change, Sam 2026-06-09): "Are you open to relocation?" is now ALWAYS
-answered **Yes** — Sam is open to relocation; a "No"/escalate was screening him out wrongly.
+RELOCATION (policy change, 2026-06-09): "Are you open to relocation?" is now ALWAYS
+answered **Yes** — the applicant is open to relocation; a "No"/escalate was screening them out wrongly.
 It joins the same screen-clearing auto-Yes bucket as in-office/RTO (he decides for real at offer
 stage). The NEGATION guard still catches inverted phrasings ("unable/unwilling to relocate?").
 
 CRITICAL EXCLUSIONS (must NEVER be auto-answered as office-commitment):
   * Work-auth / visa / sponsorship / citizenship — owned by `classify_work_auth`; reused
                   here to skip, never re-answered.
-  * EEO / demographic self-ID — owned by `questions._is_eeo`; left for Sam.
+  * EEO / demographic self-ID — owned by `questions._is_eeo`; left for the user.
   * Travel / willingness to travel / shift work / overtime — ambiguous, NOT a fixed Yes;
                   escalate.
 Default = UNRELATED (escalate). When in doubt, do not auto-answer.
@@ -64,14 +64,14 @@ _ALLOW = re.compile(
     r"work(?:ing)? (?:from|out of|in) (?:the |our |one of our )?(?:\w+ ){0,3}offices?|"  # "work from our [SF] office"
     r"days? per week (?:in|at|from)|"              # "X days per week in the office"
     r"\bcommute\b|\bcommuting\b|"                  # "able to commute to <city>"
-    r"relocat|"                                    # relocation — now auto-Yes (Sam 2026-06-09)
+    r"relocat|"                                    # relocation — now auto-Yes (2026-06-09)
     r"willing to move|open to (?:moving|relocating)",
     re.IGNORECASE,
 )
 
 # NEGATION / INVERSION guard — phrasings where the office keyword is present but a "Yes"
-# would be the HARMFUL answer (telling the employer Sam CANNOT be on-site / prefers remote).
-# These must NEVER auto-Yes; escalate to Sam. Over-matching here only causes a safe escalate,
+# would be the HARMFUL answer (telling the employer the applicant CANNOT be on-site / prefers remote).
+# These must NEVER auto-Yes; escalate to the user. Over-matching here only causes a safe escalate,
 # so it is deliberately broad. None of the real positive labels ("able to come into the office",
 # "open to working in-person 25%", "able to commute to <city>") contain any of these tokens.
 _NEGATION = re.compile(
@@ -104,7 +104,7 @@ def classify_office_commitment(label: str) -> OfficeCommitmentDecision:
     if not t:
         return OfficeCommitmentDecision.UNRELATED
 
-    # 1. Hard DENY — relocation is owned by Sam, never auto-answered here.
+    # 1. Hard DENY — relocation is owned by the user, never auto-answered here.
     if _DENY.search(t):
         return OfficeCommitmentDecision.UNRELATED
 
@@ -113,7 +113,7 @@ def classify_office_commitment(label: str) -> OfficeCommitmentDecision:
     if classify_work_auth(t) != WorkAuthDecision.UNRELATED:
         return OfficeCommitmentDecision.UNRELATED
 
-    # 3. EEO / demographic self-ID — left for Sam (lazy import avoids a cycle).
+    # 3. EEO / demographic self-ID — left for the user (lazy import avoids a cycle).
     try:
         from .questions import _is_eeo
         if _is_eeo("", t):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """TDD for the honest status recompute that flips a staged record from needs_input to
-ready_to_submit once every STORED blocker Sam answered is resolved.
+ready_to_submit once every STORED blocker the user answered is resolved.
 
 Two layers:
   * recompute_status — the PURE decision (a matrix of blocker combinations + the one-way valve).
@@ -64,7 +64,7 @@ def test_legacy_unfilled_required_blocks():
 
 
 def test_declined_custom_q_does_not_block():
-    # Declined questions are intentionally left for Sam and never gated a clean form.
+    # Declined questions are intentionally left for the user and never gated a clean form.
     rec = _rec(custom_qs=[
         {"q": "Salary expectation", "status": "declined", "value": ""},
         {"q": "Why us?", "status": "drafted", "value": "ok"},

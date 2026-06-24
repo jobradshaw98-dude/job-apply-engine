@@ -35,11 +35,11 @@ def career_tree(tmp_path, monkeypatch):
     root = tmp_path / "career"
     pkg = root / "apply_engine"
     pkg.mkdir(parents=True)
-    (root / "Sam_Rivera_Resume_Master.pdf").write_text("MASTER", encoding="utf-8")
+    (root / "APPLICANT_Resume_Master.pdf").write_text("MASTER", encoding="utf-8")
     appdir = root / "applications" / "APP-001-Acme"
     appdir.mkdir(parents=True)
-    (appdir / "SAM_RIVERA_Resume.pdf").write_text("TAILORED", encoding="utf-8")
-    (appdir / "SAM_RIVERA_Cover_Letter.pdf").write_text("COVER", encoding="utf-8")
+    (appdir / "APPLICANT_Resume.pdf").write_text("TAILORED", encoding="utf-8")
+    (appdir / "APPLICANT_Cover_Letter.pdf").write_text("COVER", encoding="utf-8")
 
     data_dir = tmp_path / "data"
     data_dir.mkdir()
@@ -59,10 +59,10 @@ def _base_record(appdir: Path, **over) -> dict:
         "status": "ready_to_submit",
         "submitted": False,
         "uploaded_docs": [
-            {"doc": "resume", "path": str(appdir / "SAM_RIVERA_Resume.pdf"),
-             "name": "SAM_RIVERA_Resume.pdf"},
-            {"doc": "cover", "path": str(appdir / "SAM_RIVERA_Cover_Letter.pdf"),
-             "name": "SAM_RIVERA_Cover_Letter.pdf"},
+            {"doc": "resume", "path": str(appdir / "APPLICANT_Resume.pdf"),
+             "name": "APPLICANT_Resume.pdf"},
+            {"doc": "cover", "path": str(appdir / "APPLICANT_Cover_Letter.pdf"),
+             "name": "APPLICANT_Cover_Letter.pdf"},
         ],
         "work_auth": [{"field": "sponsor", "answer": "No"}],
         "custom_qs": [{"q": "Why us?", "kind": "essay", "status": "answered", "value": "x"}],
@@ -188,7 +188,7 @@ def test_quality_flag_only_converges_round1_no_fix(career_tree):
 
 def test_human_only_blocker_blocks_and_notifies_once(career_tree):
     appdir, data_dir = career_tree["appdir"], career_tree["data_dir"]
-    # A work-auth question left for Sam: verify_ready fails via can_submit's work-auth reason.
+    # A work-auth question left for the user: verify_ready fails via can_submit's work-auth reason.
     # No unfilled-required (needs_sam empty) so the work-auth gate — not the unfilled gate — is
     # what fires; the unanswered work-auth is signalled by the halt_reason (can_submit's
     # _had_unanswered_work_auth reads halt_reason and classifies it as a real work-auth question).
@@ -350,7 +350,7 @@ def test_cap_reached_still_dirty_exhausted(career_tree):
 
 
 # ======================================================================================
-# Lock: converge refuses to start while a Sam edit is mid-flight (is_edit_in_flight True).
+# Lock: converge refuses to start while a user edit is mid-flight (is_edit_in_flight True).
 # ======================================================================================
 
 def test_refuses_when_edit_in_flight(career_tree, monkeypatch):
@@ -433,7 +433,7 @@ def test_audit_fn_raising_yields_error_state(career_tree):
 
 
 # ======================================================================================
-# QUALITY-DIMENSION DRIVE — REASONED CONVERGENCE to the BEST HONEST package (Sam 2026-06-14).
+# QUALITY-DIMENSION DRIVE — REASONED CONVERGENCE to the BEST HONEST package (2026-06-14).
 #
 # REVISED from the prior "exactly one pass" spec. Once the BLOCK floor is clear and verify_ready
 # PASSES, the drive LOOPS applying grounded quality-dim fixes (dimensions[*] score<=3 + concrete

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Engine-side Telegram notifier for an open human_blocker (Feature B, Phase 3).
 
-When the apply engine writes a record carrying an OPEN `human_blocker` (a halt Sam must
+When the apply engine writes a record carrying an OPEN `human_blocker` (a halt the user must
 action), it fires ONE Telegram line so he knows a card is waiting on the dashboard. This is the
 ENGINE's notify (design doc §5a, M2): it is fired atomically with the blocker write under the
 SAME filemutex the engine already owns for the manifest, NOT a server helper. The server NEVER
@@ -23,7 +23,7 @@ import urllib.request
 
 from . import config
 
-# Sam's Telegram chat_id (MEMORY.md / global CLAUDE.md). The bot token is read from
+# the user's Telegram chat_id (MEMORY.md / global CLAUDE.md). The bot token is read from
 # brief_config.json (key `telegram_bot_token`); the chat_id is a stable constant.
 _CHAT_ID = "8698619324"
 # The brief_config.json key holding the bot token (verified present 2026-06-11). If this key is

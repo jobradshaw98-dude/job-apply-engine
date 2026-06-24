@@ -37,7 +37,7 @@ HARD CONSTRAINTS (the brief)
 
 The watchdog is a CHEAP, on-demand sweep wired where the queue is READ (aria_server's
 `apply_queue` list render) — NOT a daemon/thread. One pass per dashboard load is enough: the bar
-only needs to be correct when Sam looks at it.
+only needs to be correct when the user looks at it.
 """
 import json
 import os
@@ -109,7 +109,7 @@ def _is_stale_running(conv: dict, now_naive: datetime, ttl_s: int) -> bool:
 def _generic_interrupted_blocker(job_id: str, now_naive: datetime) -> dict:
     """A page-less, generic human_blocker for an orphaned/aged-out converge loop. Mirrors the §1b
     schema (and converge._build_human_blocker's error shape): escalate tier (no answer maps back —
-    the loop died, it isn't a question only Sam can answer), category render_fail, a generic
+    the loop died, it isn't a question only the user can answer), category render_fail, a generic
     'convergence interrupted — re-run staging' sentence. answered_at None so it surfaces; notified
     flags False (the sweep does NOT notify — see module docstring)."""
     ts = now_naive.astimezone().isoformat(timespec="seconds")
@@ -150,7 +150,7 @@ def _open_need_qkeys(record: dict) -> set:
     pruned) and must stop surfacing.
 
     Open needs come from two places (matching the answer route's validation surface):
-      * needs_sam[] — each entry is an unanswered field the orchestrator left for Sam. An
+      * needs_sam[] — each entry is an unanswered field the orchestrator left for the user. An
         entry is open unless it carries an answer/answered_at.
       * custom_qs[] (a.k.a. `generated`) — an UNANSWERED essay/question. An entry whose status is
         'answered' (or that carries a non-empty value/answer + answered_at) is resolved, so its key
@@ -191,7 +191,7 @@ def _open_need_qkeys(record: dict) -> set:
 def _is_stale_blocker(blocker: dict, record: dict) -> bool:
     """True iff this human_blocker should STOP surfacing because its underlying need is resolved:
 
-      (a) it carries an `answered_at` (Sam answered it — the answer route stamps this), OR
+      (a) it carries an `answered_at` (the user answered it — the answer route stamps this), OR
       (b) its answer_target points at an answerable question whose qkey is no longer in the record's
           OPEN-need set (it got answered or pruned).
 

@@ -128,7 +128,7 @@ def test_forbidden_rendering_blocks_on_resume(text):
     assert "%" in (blocks[0]["note"] or "")
 
 
-# ---- COVER path — counts ALLOWED in prose (2026-06-21 Sam) -------------
+# ---- COVER path — counts ALLOWED in prose (2026-06-21) -------------
 
 @pytest.mark.parametrize("text", MUST_BLOCK)
 def test_count_allowed_in_cover_letter(text):

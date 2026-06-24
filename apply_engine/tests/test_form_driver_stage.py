@@ -16,8 +16,8 @@ def _valid_kwargs(**over):
         custom_qs=[{"q": "Desired salary", "kind": "text", "status": "answered",
                     "reason": "", "value": "125000", "answered_by": "sam"}],
         work_auth=[{"q": "Authorized?", "field": "authorized_no_sponsorship", "answer": "Yes"}],
-        uploaded_docs=[{"doc": "resume", "path": "C:/x/SAM_RIVERA_Resume.pdf",
-                        "name": "SAM_RIVERA_Resume.pdf"}],
+        uploaded_docs=[{"doc": "resume", "path": "C:/x/APPLICANT_Resume.pdf",
+                        "name": "APPLICANT_Resume.pdf"}],
     )
     base.update(over)
     return base

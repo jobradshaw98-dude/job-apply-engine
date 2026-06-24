@@ -4,7 +4,7 @@ stored state and persist any change atomically.
 
 WHY THIS EXISTS
 Staged records carry the `status` the orchestrator set at STAGING time ("needs_input" when a
-required field/question still needed Sam). Sam then answers everything from the dashboard
+required field/question still needed the user). the user then answers everything from the dashboard
 (via regen_answer --provide / --instruction) and the audit verdict refreshes to PASS — but until
 those completion points were wired to recompute, nothing ever re-derived `status`, so
 finish.can_submit kept refusing review-ready records with "status is 'needs_input'". The

@@ -21,9 +21,9 @@ def _appdir(tmp_path, name, *, resume=True, cover=True):
     d = tmp_path / "applications" / name
     d.mkdir(parents=True)
     if resume:
-        (d / "SAM_RIVERA_Resume.pdf").write_text("R", encoding="utf-8")
+        (d / "APPLICANT_Resume.pdf").write_text("R", encoding="utf-8")
     if cover:
-        (d / "SAM_RIVERA_Cover_Letter.pdf").write_text("C", encoding="utf-8")
+        (d / "APPLICANT_Cover_Letter.pdf").write_text("C", encoding="utf-8")
     return d
 
 
@@ -34,15 +34,15 @@ def test_cover_registered_when_present_on_disk(tmp_path):
     rec = {
         "job_id": "JOB-226", "submitted": False,
         "uploaded_docs": [
-            {"doc": "resume", "path": str(appdir / "SAM_RIVERA_Resume.pdf"),
-             "name": "SAM_RIVERA_Resume.pdf"},
+            {"doc": "resume", "path": str(appdir / "APPLICANT_Resume.pdf"),
+             "name": "APPLICANT_Resume.pdf"},
         ],
     }
     changed, new_docs = plan_backfill(rec)
     assert changed is True
     docs = {d["doc"]: d["path"] for d in new_docs}
-    assert docs["resume"] == str(appdir / "SAM_RIVERA_Resume.pdf")
-    assert docs["cover"] == str(appdir / "SAM_RIVERA_Cover_Letter.pdf")
+    assert docs["resume"] == str(appdir / "APPLICANT_Resume.pdf")
+    assert docs["cover"] == str(appdir / "APPLICANT_Cover_Letter.pdf")
 
 
 def test_resume_registered_when_uploaded_docs_empty(tmp_path):
@@ -52,14 +52,14 @@ def test_resume_registered_when_uploaded_docs_empty(tmp_path):
     rec = {
         "job_id": "JOB-214", "submitted": False,
         "uploaded_docs": [
-            {"doc": "cover", "path": str(appdir / "SAM_RIVERA_Cover_Letter.pdf"),
-             "name": "SAM_RIVERA_Cover_Letter.pdf"},
+            {"doc": "cover", "path": str(appdir / "APPLICANT_Cover_Letter.pdf"),
+             "name": "APPLICANT_Cover_Letter.pdf"},
         ],
     }
     changed, new_docs = plan_backfill(rec)
     assert changed is True
     docs = {d["doc"]: d["path"] for d in new_docs}
-    assert docs["resume"] == str(appdir / "SAM_RIVERA_Resume.pdf")
+    assert docs["resume"] == str(appdir / "APPLICANT_Resume.pdf")
 
 
 def test_idempotent_no_change_when_both_registered(tmp_path):
@@ -69,10 +69,10 @@ def test_idempotent_no_change_when_both_registered(tmp_path):
     rec = {
         "job_id": "JOB-226", "submitted": False,
         "uploaded_docs": [
-            {"doc": "resume", "path": str(appdir / "SAM_RIVERA_Resume.pdf"),
-             "name": "SAM_RIVERA_Resume.pdf"},
-            {"doc": "cover", "path": str(appdir / "SAM_RIVERA_Cover_Letter.pdf"),
-             "name": "SAM_RIVERA_Cover_Letter.pdf"},
+            {"doc": "resume", "path": str(appdir / "APPLICANT_Resume.pdf"),
+             "name": "APPLICANT_Resume.pdf"},
+            {"doc": "cover", "path": str(appdir / "APPLICANT_Cover_Letter.pdf"),
+             "name": "APPLICANT_Cover_Letter.pdf"},
         ],
     }
     changed, new_docs = plan_backfill(rec)
@@ -96,8 +96,8 @@ def test_no_cover_on_disk_leaves_resume_only(tmp_path):
     rec = {
         "job_id": "JOB-900", "submitted": False,
         "uploaded_docs": [
-            {"doc": "resume", "path": str(appdir / "SAM_RIVERA_Resume.pdf"),
-             "name": "SAM_RIVERA_Resume.pdf"},
+            {"doc": "resume", "path": str(appdir / "APPLICANT_Resume.pdf"),
+             "name": "APPLICANT_Resume.pdf"},
         ],
     }
     changed, new_docs = plan_backfill(rec)
@@ -109,19 +109,19 @@ def test_master_path_never_registered(tmp_path):
     """A uploaded_docs resume entry that is the MASTER must not be carried forward as a tailored
     resume — the plan drops it (the sibling cover dir still yields the tailored resume if present)."""
     appdir = _appdir(tmp_path, "APP-031-Cresta")
-    master = tmp_path / "Sam_Rivera_Resume_Master.pdf"
+    master = tmp_path / "APPLICANT_Resume_Master.pdf"
     master.write_text("M", encoding="utf-8")
     rec = {
         "job_id": "JOB-226", "submitted": False,
         "uploaded_docs": [
-            {"doc": "resume", "path": str(master), "name": "Sam_Rivera_Resume_Master.pdf"},
-            {"doc": "cover", "path": str(appdir / "SAM_RIVERA_Cover_Letter.pdf"),
-             "name": "SAM_RIVERA_Cover_Letter.pdf"},
+            {"doc": "resume", "path": str(master), "name": "APPLICANT_Resume_Master.pdf"},
+            {"doc": "cover", "path": str(appdir / "APPLICANT_Cover_Letter.pdf"),
+             "name": "APPLICANT_Cover_Letter.pdf"},
         ],
     }
     changed, new_docs = plan_backfill(rec)
     docs = {d["doc"]: d["path"] for d in new_docs}
     # the tailored resume beside the cover replaces the master entry
-    assert docs["resume"] == str(appdir / "SAM_RIVERA_Resume.pdf")
+    assert docs["resume"] == str(appdir / "APPLICANT_Resume.pdf")
     assert "master" not in os.path.basename(docs["resume"]).lower()
     assert changed is True

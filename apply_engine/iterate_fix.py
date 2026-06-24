@@ -14,7 +14,7 @@ exhausted". This module holds the two pure pieces of that mechanism:
     support for it.
 
   * `classify_residual(...)` — after K exhausted attempts, classify the surviving finding as
-    `human_only` (the fix needs a fact only Sam has — the ledger can neither confirm nor deny
+    `human_only` (the fix needs a fact only the user has — the ledger can neither confirm nor deny
     the claimed experience) vs `unsupportable` (the premise can't be grounded at all — the content
     should be reworded or dropped). This lets the convergence loop surface the RIGHT blocker
     instead of a blunt "convergence stalled".
@@ -25,7 +25,7 @@ the iterate loop is testable without a live claude -p.
 """
 import json
 
-# Default inner-attempt cap for the engine-own iterate path. K≈3 (brief). Sam's own
+# Default inner-attempt cap for the engine-own iterate path. K≈3 (brief). the user's own
 # single-pass edits use max_attempts=1 (this module is never engaged for those).
 DEFAULT_MAX_ATTEMPTS = 3
 
@@ -137,14 +137,14 @@ def length_feedback_clause(prev_attempt_text, current_words, min_words, max_word
 # ---- residual classification (after K attempts still blocked) ------------------------------
 
 # A finding the loop could not clear by removal. Two terminal classes:
-#   human_only    — the fix needs a fact only Sam has (the ledger can neither confirm nor deny
-#                   the claimed experience). Surface as an ANSWERABLE blocker — ask Sam.
+#   human_only    — the fix needs a fact only the user has (the ledger can neither confirm nor deny
+#                   the claimed experience). Surface as an ANSWERABLE blocker — ask the user.
 #   unsupportable — the premise can't be grounded in the ledger AT ALL; the content should be
 #                   reworded or dropped (a "rewrite or drop this content" blocker).
 HUMAN_ONLY = "human_only"
 UNSUPPORTABLE = "unsupportable"
 # A G2 length fix that could not reach the stated word range with SUPPORTED facts after K attempts.
-# This is NOT human_only (a length problem is never "needs Sam to confirm a fact") — it means the
+# This is NOT human_only (a length problem is never "needs the user to confirm a fact") — it means the
 # answer can't be grown/shrunk into range without inventing or padding, so it's a rewrite-or-drop /
 # review case. Surfaced as its own class so the blocker says "couldn't reach the length", not
 # "needs your call".
@@ -153,7 +153,7 @@ LENGTH_UNMET = "length_unmet"
 
 def _heuristic_class(finding):
     """Deterministic fallback classification when no LLM is available (or it errors). A finding
-    whose issue/text talks about an UNVERIFIABLE/UNCONFIRMED experience or a fact only Sam can
+    whose issue/text talks about an UNVERIFIABLE/UNCONFIRMED experience or a fact only the user can
     confirm -> human_only; otherwise default to unsupportable (the safe 'reword or drop' class —
     we never silently pass it)."""
     if not isinstance(finding, dict):
@@ -183,12 +183,12 @@ def classify_residual(finding, ledger_facts="", llm=None):
         off = _norm_ws(finding.get("offending_text", ""))
         issue = _norm_ws(finding.get("issue", ""))
         prompt = (
-            "You are triaging ONE accuracy-gate finding on Sam Rivera's job-application content "
+            "You are triaging ONE accuracy-gate finding on the applicant's job-application content "
             "that an automated rewrite loop could not fix by removing/rewording the claim. Decide which "
             "of TWO categories it belongs to, using the VETTED CLAIMS LEDGER as the only ground truth.\n\n"
             "human_only  : the claim might be TRUE but the ledger can neither confirm nor deny it — it "
-            "names an experience/fact only Sam can verify. The right action is to ASK SAM.\n"
-            "unsupportable: the claim's premise is not grounded in the ledger at all and asking Sam "
+            "names an experience/fact only the user can verify. The right action is to ASK THE USER.\n"
+            "unsupportable: the claim's premise is not grounded in the ledger at all and asking the user "
             "would not help — the content should be reworded or dropped.\n\n"
             f"VETTED CLAIMS LEDGER:\n{(ledger_facts or '')[:14000]}\n\n"
             f"FINDING offending_text: {off}\nFINDING issue: {issue}\n\n"

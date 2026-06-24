@@ -8,12 +8,12 @@ verify.py only checks the handful of fields the engine itself set, so it is blin
 to these. This module catches them.
 
 The core (`audit_fields`) is pure: it takes an `observed` dict (form LABEL,
-lowercased -> current value) and a `known` dict (canonical key -> Sam's correct
+lowercased -> current value) and a `known` dict (canonical key -> the user's correct
 value) and returns a conservative list of Corrections. It NEVER touches free-text /
 essay / custom questions, and it only proposes an `overwrite` when it is confident
 the label maps to a known identity/employment/contact field AND the values differ.
 When a field looks identity-bearing but we have no known value, it `flag`s it for
-Sam instead of guessing. Nothing here submits anything.
+the user instead of guessing. Nothing here submits anything.
 """
 from dataclasses import dataclass
 from typing import List, Optional
@@ -23,8 +23,8 @@ from typing import List, Optional
 class Correction:
     label: str        # the form field label (as observed, lowercased)
     current: str      # what the ATS put in the field
-    correct: str      # Sam's correct value ("" when we have none -> flag)
-    action: str       # "overwrite" (confident fix) | "flag" (leave for Sam)
+    correct: str      # the user's correct value ("" when we have none -> flag)
+    action: str       # "overwrite" (confident fix) | "flag" (leave for the user)
     selector: str = ""  # stable selector captured at read time ("" = ambiguous/uncorrectable)
 
 
@@ -98,7 +98,7 @@ def audit_fields(observed: dict, known: dict) -> List[Correction]:
       * If we have a non-empty known value and it differs from the current value,
         propose an `overwrite`.
       * If the label maps to a known field but we have no value for it, `flag` it so
-        Sam can decide — never guess.
+        the user can decide — never guess.
     """
     corrections: List[Correction] = []
     for raw_label, raw_current in observed.items():

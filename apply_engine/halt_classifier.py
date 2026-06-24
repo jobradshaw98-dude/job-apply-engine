@@ -13,7 +13,7 @@ returned dict to `out.human_blocker`; `build_record` carries it onto the flat ma
 No notification, no convergence loop, no dashboard render — those are later phases.
 
 Classifier discipline (HARD, from feedback_apply_engine_live_dom_and_empty_guard):
-  * A FAILED WIDGET SET is ALWAYS `escalate` (category `unknown_widget`) — a value Sam types
+  * A FAILED WIDGET SET is ALWAYS `escalate` (category `unknown_widget`) — a value the user types
     can't fix a DOM the engine couldn't drive. NEVER `answerable`.
   * `escalate` tier ALWAYS sets `answer_target.kind="none"` (no provide-answer box) and carries
     `code_context` (file:line) + screenshot + page_state so the watched-MCP fallback lands with
@@ -28,7 +28,7 @@ import re
 from pathlib import Path
 
 # A needs_sam / unfilled item that is an internal field key, not a human question, has no
-# answer Sam can supply from the dashboard -> escalate, not answerable. Mirrors the dashboard's
+# answer the user can supply from the dashboard -> escalate, not answerable. Mirrors the dashboard's
 # aria_server._is_raw_field_key intent: a bare token (UUID / snake_case id / cards[...] name) with
 # no space and no '?'. Kept here so the engine doesn't depend on the server.
 _RAW_FIELD_RE = re.compile(
@@ -45,7 +45,7 @@ def is_raw_field_key(text) -> bool:
 
 
 # Tier per category (§4 table). escalate = needs perception/improvisation (route to watched MCP);
-# answerable = a fact/value Sam can supply via the dashboard.
+# answerable = a fact/value the user can supply via the dashboard.
 _ESCALATE = {"unknown_widget", "captcha", "file_upload", "zero_fields", "render_fail"}
 _ANSWERABLE = {"screening_yesno", "missing_value", "city", "work_auth",
                "calibration_unfixable", "unverifiable_claim"}

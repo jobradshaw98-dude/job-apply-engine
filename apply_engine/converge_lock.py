@@ -116,7 +116,7 @@ def is_edit_in_flight(record):
     """True if an answer or content/deck edit is MID-FLIGHT on this staged record.
 
     The convergence loop consults this and REFUSES TO START while True — it must not race a
-    Sam-launched dashboard edit (an answer rewrite or a resume/cover/deck content edit), which
+    user-launched dashboard edit (an answer rewrite or a resume/cover/deck content edit), which
     would re-open the very fabrication/calibration gates the loop is trying to clear.
 
     Reads only the record's OWN cross-process fields (written by the server before it launches a

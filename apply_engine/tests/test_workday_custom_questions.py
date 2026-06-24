@@ -1,5 +1,5 @@
 """WorkdayAdapter custom-question resolution: a grounded pick is auto-selected; a
-DECLINE / gate-block / failed-select / no-resolver case escalates to Sam (never a
+DECLINE / gate-block / failed-select / no-resolver case escalates to the user (never a
 guess). Browser-free — W.read_options / W.button_select are stubbed."""
 import apply_engine.wd_widgets as W
 from apply_engine.adapters.workday import WorkdayAdapter

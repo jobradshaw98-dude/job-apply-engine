@@ -1,6 +1,6 @@
 """drafts_for_audit pulls the LLM-GENERATED answers out of a run's `generated`/`custom_qs`
 records — exactly the ones that need the career-draft-auditor (judgment) gate before they
-reach Sam. Deterministic answers Sam would never question aren't the concern; invented
+reach the user. Deterministic answers the user would never question aren't the concern; invented
 essay/short-text content is. declined/blocked/fill_error and empty values are excluded (nothing
 was filled, so nothing to audit)."""
 from apply_engine.draft_audit import drafts_for_audit, load_job_drafts

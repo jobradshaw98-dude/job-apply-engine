@@ -10,7 +10,7 @@ from apply_engine.adapters.greenhouse import GreenhouseAdapter
 
 
 def _make_pdf(tmp_path: Path) -> Path:
-    p = tmp_path / "SAM_RIVERA_Resume.pdf"
+    p = tmp_path / "APPLICANT_Resume.pdf"
     p.write_bytes(b"%PDF-1.4\n%fake\n")
     return p
 
@@ -23,7 +23,7 @@ def test_async_filename_render_is_caught_by_polling(fixture_server, tmp_path):
         page.goto(f"{fixture_server}/greenhouse_modern_async_resume.html")
         ok = a._attach_resume(page, str(pdf))
         assert ok is True
-        assert "SAM_RIVERA_Resume" in page.inner_text("body")
+        assert "APPLICANT_Resume" in page.inner_text("body")
 
 
 def test_old_fixed_wait_would_have_missed_it(fixture_server, tmp_path):

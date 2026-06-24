@@ -6,8 +6,8 @@ These prove the upgrade that turns the one-shot regen into a rewrite→re-gate�
      passes converges, and the attempt-2 PROMPT carries the attempt-1 finding's feedback.
   2. Bounded — an llm that NEVER grounds returns a classified residual after K attempts, writes no
      passing answer, and never loops past K.
-  3. Classification — a Sam-only-fact finding -> human_only; a premise-unsupportable -> unsupportable.
-  4. Backward-compat — max_attempts=1 is exactly one regen (today's behaviour); a Sam --instruction
+  3. Classification — a user-only-fact finding -> human_only; a premise-unsupportable -> unsupportable.
+  4. Backward-compat — max_attempts=1 is exactly one regen (today's behaviour); a user --instruction
      edit that fabricates is still BLOCKED (original kept), NOT auto-iterated.
 
 No claude CLI runs: make_claude_llm / make_audit_fn / load_facts are monkeypatched; the ledger read
@@ -147,7 +147,7 @@ def test_bounded_never_grounds_returns_residual(tmp_path, monkeypatch):
 
 
 def test_classification_human_only(tmp_path, monkeypatch):
-    """A residual the classifier calls human_only is stamped human_only (asks Sam)."""
+    """A residual the classifier calls human_only is stamped human_only (asks the user)."""
     monkeypatch.setattr(config, "ARIA_DATA", tmp_path)
     monkeypatch.setattr(config, "JOBS_JSON", tmp_path / "jobs.json")
     _wire_pkgdir(tmp_path, monkeypatch)
@@ -160,7 +160,7 @@ def test_classification_human_only(tmp_path, monkeypatch):
                 return '{"class":"human_only","why":"only Sam can confirm this experience"}'
             if "Return ONLY a JSON array" in prompt:   # self-audit -> one structured finding
                 return ('[{"offending_text":"led a team of 12","issue":"team size not in ledger",'
-                        '"fix":"confirm with Sam"}]')
+                        '"fix":"confirm with the user"}]')
             return "I led a team of 12 on the project."   # always blocked
         return _fn
     monkeypatch.setattr(regen_answer, "make_claude_llm", _factory)
@@ -178,7 +178,7 @@ def test_classification_human_only(tmp_path, monkeypatch):
 
 def test_backward_compat_max_attempts_1_single_pass(tmp_path, monkeypatch):
     """max_attempts=1 -> exactly ONE generation, a fabricating edit is BLOCKED (original kept), and
-    NO residual is stamped (today's single-pass behaviour, untouched). This is the Sam-edit path."""
+    NO residual is stamped (today's single-pass behaviour, untouched). This is the user-edit path."""
     monkeypatch.setattr(config, "ARIA_DATA", tmp_path)
     monkeypatch.setattr(config, "JOBS_JSON", tmp_path / "jobs.json")
     _wire_pkgdir(tmp_path, monkeypatch)
@@ -199,7 +199,7 @@ def test_backward_compat_max_attempts_1_single_pass(tmp_path, monkeypatch):
     monkeypatch.setattr(regen_answer, "make_audit_fn",
                         lambda *a, **k: (lambda t: ["fabricated wear claim"]))
 
-    # Default max_attempts is 1 (omit the flag entirely — the dashboard/Sam path).
+    # Default max_attempts is 1 (omit the flag entirely — the dashboard/user path).
     rc = regen_answer.main([
         "JOB-900", "--question", "Tell us about your wear analysis.",
         "--instruction", "reframe",

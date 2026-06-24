@@ -193,7 +193,7 @@ def test_reject_bare_matlab_in_skills():
 
 
 def test_reject_bare_python_in_skills():
-    # bare "Python" as a skills proficiency implies hand-coding fluency Sam does not claim
+    # bare "Python" as a skills proficiency implies hand-coding fluency the applicant does not claim
     # (caused the JOB-237 calibration FAIL). It is a hard reject unless framed as AI-orchestrated.
     pkg = _valid_pkg()
     pkg["resume"]["skills"] = [

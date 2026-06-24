@@ -5,7 +5,7 @@ the fabrication auditor (refresh_audit.audit_answers).
 WHY THIS EXISTS (Stage-3 of the apply-pipeline quality contract)
 The fabrication auditor answers ONE question: "is every claim in the answers supported by the
 ledger?" It is a HONESTY gate — it cannot tell a truthful-but-generic master-resume dump from a
-truthful, sharply tailored package. Sam's quality contract says every job he selects gets a
+truthful, sharply tailored package. the quality contract says every job the applicant selects gets a
 full tailored+audited package: no master fallback, no junk. So a package can pass fabrication
 (nothing false) and still be junk (covers none of the JD's asks, makes a generic case, has no
 specifics, reads like boilerplate AI). This judge is the QUALITY lens that catches that class.
@@ -17,13 +17,13 @@ the custom answers — against the JD, on four dimensions (1-5 each):
   * fit          — does it make a SPECIFIC case for THIS role/company (not a generic case any
                    employer would receive)?
   * specificity  — concrete projects / numbers / evidence vs vague filler?
-  * voice        — Sam's authentic voice, not generic-AI and not master-resume boilerplate?
+  * voice        — the applicant's authentic voice, not generic-AI and not master-resume boilerplate?
 
 VERDICT (mirrors the fabrication two-severity idea, but THREE-valued: PASS / FLAG / FAIL)
   * FAIL = a HARD FLOOR breach: jd_coverage <= 2 OR specificity <= 2. A package that doesn't
            cover the JD, or has no specifics, is not submittable. FAIL blocks submit.
   * FLAG = any dimension <= 3 (and no FAIL): the package is submittable but weak on something;
-           surfaced to Sam, NOT a hard block (he can submit or improve via the edit loop).
+           surfaced to the user, NOT a hard block (he can submit or improve via the edit loop).
   * PASS = every dimension >= 4.
 This is the NON-WEDGING reading of the contract's "must PASS both gates": fabrication PASS +
 quality NOT-FAIL. FLAG is advisory so an over-critical LLM can't permanently lock Submit the way
@@ -35,7 +35,7 @@ retry) RAISES out of judge_quality; the ORCHESTRATION layer (refresh_audit.refre
 and stamps judge_ran False WITH verdict FAIL (fail closed on both fields, 2026-06-11), so a
 degraded judge can never present as a completed quality review even to a consumer that reads
 the verdict alone. finish.can_submit refuses a judge_ran=False quality_audit the same
-as a missing one. claude -p ONLY — never the metered API (Sam's hard rule).
+as a missing one. claude -p ONLY — never the metered API (the user's hard rule).
 """
 import json
 from datetime import datetime
@@ -162,7 +162,7 @@ def _answers_text(answers: list) -> str:
 
 
 def _candidate_stack() -> str:
-    """Sam's real, assertable AI/engineering stack — the ONLY tools a quality `fix` may tell him
+    """the applicant's real, assertable AI/engineering stack — the ONLY tools a quality `fix` may tell them
     to name. Pulled from capabilities.md so it stays in sync with the screening grounding; falls
     back to a concise inline summary if that file can't be read. Prevents the judge from suggesting
     he claim a JD tool he hasn't used (the LangGraph mis-fix, 2026-06-10)."""
@@ -180,7 +180,7 @@ def _candidate_stack() -> str:
 
 
 def _positioning_rules() -> str:
-    """Sam's SIX grounded positioning rules — the discrete, GROUNDED targeting checks the
+    """the applicant's SIX grounded positioning rules — the discrete, GROUNDED targeting checks the
     calibration gate runs. These are NOT style opinions: each is a true-content-but-wrong-audience
     miss (or a hard never-claim) drawn from his career-memory rules. The prompt asks the model to
     judge the package against EACH and report a violation TYPE only when a rule is actually broken,
@@ -197,7 +197,7 @@ def _positioning_rules() -> str:
         "optimization, or test-to-sim correlation, NOT hands-on CAD modeling. Leading with "
         "SolidWorks / Creo / NX / CAD-modeling as the headline strength is a violation.\n"
         "3. CODING-FLUENCY CLAIM (type: coding_fluency). ANY claim of Python / MATLAB / "
-        "programming-language fluency, proficiency, or hand-coding skill is a violation. Sam "
+        "programming-language fluency, proficiency, or hand-coding skill is a violation. The applicant "
         "ORCHESTRATES AI coding agents (Claude Code, Codex); he does not hand-code. \"Proficient in "
         "Python\", \"expert MATLAB\", \"strong programmer\" are all violations. Framing as an "
         "AI-native engineer who ships software via AI agents is correct and NOT a violation.\n"
@@ -215,7 +215,7 @@ def _positioning_rules() -> str:
 def _build_prompt(job: dict, resume: dict, cover: dict, answers: list) -> str:
     """Build the single claude -p prompt. PURE except for reading the capabilities grounding."""
     return (
-        "You are a hiring-quality reviewer for Sam Rivera's job applications. Your job is "
+        "You are a hiring-quality reviewer for the user Rivera's job applications. Your job is "
         "NOT to fact-check (a separate honesty auditor does that) — it is to judge whether this "
         "TAILORED application package is GOOD ENOUGH to send for THIS specific role, or whether "
         "it reads like a generic, untailored, or low-substance package.\n\n"
@@ -226,12 +226,12 @@ def _build_prompt(job: dict, resume: dict, cover: dict, answers: list) -> str:
         "any employer could receive? (5 = clearly THIS job; 1 = boilerplate.)\n"
         "  * specificity — concrete projects, numbers, named tools, and real evidence vs. vague "
         "filler and adjectives? (5 = concrete and evidenced; 1 = hand-wavy.)\n"
-        "  * voice — Sam's authentic, direct, human voice vs. generic-AI phrasing or recycled "
+        "  * voice — the applicant's authentic, direct, human voice vs. generic-AI phrasing or recycled "
         "master-resume boilerplate? (5 = sounds like a real, specific person; 1 = AI/boilerplate.)\n\n"
         "Be a tough but fair reviewer. Reserve 5s for genuinely strong work; do not inflate.\n\n"
         "For EACH dimension, also give a `fix`: a concrete, actionable instruction that would RAISE "
         "that dimension's score. HARD RULE on fixes: ground every suggestion in the CANDIDATE STACK "
-        "below. NEVER tell Sam to name, add, or claim a tool/framework/skill he has not used. If "
+        "below. NEVER tell the applicant to name, add, or claim a tool/framework/skill they have not used. If "
         "the JD names a specific tool he lacks (e.g. LangGraph, Langfuse, Pydantic-AI, Kubernetes), "
         "do NOT suggest adding it: instead suggest naming his REAL equivalent from the stack and "
         "mapping it to the JD's intent. Say WHAT to change and WHERE (resume / cover letter / a "
@@ -250,8 +250,8 @@ def _build_prompt(job: dict, resume: dict, cover: dict, answers: list) -> str:
         "=== POSITIONING RULES (the calibration gate — break one = a violation) ===\n"
         + _positioning_rules() + "\n\n"
         "For EACH violation, the `fix` is grounded the SAME way as the dimension fixes: it may ONLY "
-        "reference Sam's real stack / the rules above, and may NEVER invent a tool or claim.\n\n"
-        "=== CANDIDATE STACK (what Sam has ACTUALLY used — fixes may only reference THIS) ===\n"
+        "reference the applicant's real stack / the rules above, and may NEVER invent a tool or claim.\n\n"
+        "=== CANDIDATE STACK (what the applicant has ACTUALLY used — fixes may only reference THIS) ===\n"
         + _candidate_stack() + "\n\n"
         "=== JOB DESCRIPTION ===\n" + _jd_text(job) + "\n\n"
         "=== TAILORED RESUME ===\n" + _resume_text(resume) + "\n\n"
@@ -473,7 +473,7 @@ def _build_calibration_prompt(job: dict, resume: dict, cover: dict, answers: lis
     grounding judge_quality uses, but it asks for ONLY the calibration array (no dimension scores).
     PURE except for reading the capabilities grounding (via _positioning_rules/_candidate_stack)."""
     return (
-        "You are a targeting reviewer for Sam Rivera's job applications. Your ONLY job here "
+        "You are a targeting reviewer for the user Rivera's job applications. Your ONLY job here "
         "is the CALIBRATION check: a list of DISCRETE, GROUNDED targeting violations. You are NOT "
         "scoring quality and NOT fact-checking (other gates do that). You catch MIS-TARGETING: "
         "content that may be TRUE but is aimed at the wrong audience. Check the package (resume + "
@@ -482,9 +482,9 @@ def _build_calibration_prompt(job: dict, resume: dict, cover: dict, answers: lis
         "grounds, and respect rule 1's JD-awareness. Return an EMPTY list when correctly targeted.\n\n"
         "=== POSITIONING RULES (break one = a violation) ===\n"
         + _positioning_rules() + "\n\n"
-        "For EACH violation, the `fix` may ONLY reference Sam's real stack / the rules above, "
+        "For EACH violation, the `fix` may ONLY reference the applicant's real stack / the rules above, "
         "and may NEVER invent a tool or claim.\n\n"
-        "=== CANDIDATE STACK (what Sam has ACTUALLY used — fixes may only reference THIS) ===\n"
+        "=== CANDIDATE STACK (what the applicant has ACTUALLY used — fixes may only reference THIS) ===\n"
         + _candidate_stack() + "\n\n"
         "=== JOB DESCRIPTION ===\n" + _jd_text(job) + "\n\n"
         "=== TAILORED RESUME ===\n" + _resume_text(resume) + "\n\n"

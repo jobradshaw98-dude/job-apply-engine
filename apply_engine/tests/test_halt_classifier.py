@@ -27,7 +27,7 @@ def _server_qkey(s):
 
 
 # (label, category, expected_tier, expected_target_kind, halt-site code line) — mirrors §4.
-# ANSWERABLE tier: a fact/value only Sam has. ESCALATE tier: needs perception/improvisation.
+# ANSWERABLE tier: a fact/value only the user has. ESCALATE tier: needs perception/improvisation.
 _TABLE = [
     # category               tier         target_kind   has_question
     ("work_auth",            "answerable", "needs_sam", True),
@@ -76,7 +76,7 @@ def test_classify_halt_tier_category_target(category, tier, target_kind, has_q):
 
 def test_failed_widget_set_is_always_escalate():
     """LIVE-DOM RULE (feedback_apply_engine_live_dom_and_empty_guard): a widget the engine could
-    not drive is unknown_widget -> escalate, NEVER answerable. A value Sam types can't fix a
+    not drive is unknown_widget -> escalate, NEVER answerable. A value the user types can't fix a
     DOM the engine can't drive."""
     out = JobOutcome(job_id="JOB-5", status="needs_sam",
                      halt_reason="could not set work-auth answer (authorized=Yes) on the form")
@@ -189,7 +189,7 @@ def test_orchestrator_wires_blocker_on_citizenship_halt(fixture_server, tmp_path
 
 
 def test_is_raw_field_key_routes_bare_keys_to_escalate():
-    """A bare field key / UUID (no human question) has no answer Sam can supply -> the unfilled
+    """A bare field key / UUID (no human question) has no answer the user can supply -> the unfilled
     halt routes it to escalate, not a missing_value answer box. Pins the helper the orchestrator
     uses to make that split."""
     assert is_raw_field_key("cards[7f62479b][field0]")

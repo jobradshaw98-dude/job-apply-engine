@@ -12,7 +12,7 @@ SCOPE (deliberately tight)
   * Skip submitted records entirely (read-only).
   * Only custom_qs with status == "drafted". Never "answered" short-facts, never declined/blocked
     empties, never needs_input.
-  * NEVER touch an answer Sam wrote himself (answered_by == "sam") — his words are final.
+  * NEVER touch an answer the user wrote themselves (answered_by == "sam") — their words are final.
   * Only answers whose current value has MORE THAN ONE em-dash. One or zero is already fine.
 
 HOW IT EDITS
@@ -61,7 +61,7 @@ def _load_manifest(manifest_path):
 
 def _candidates(app):
     """Yield (question, dash_count) for every custom_q on `app` that should be de-dashed:
-    status == 'drafted', NOT answered_by == 'sam', and value carries > 1 em-dash. We read the
+    status == 'drafted', NOT answered_by == "sam", and value carries > 1 em-dash. We read the
     question text fresh from the manifest each pass, never caching the dict, because regen_answer
     rewrites the file underneath us between answers."""
     out = []

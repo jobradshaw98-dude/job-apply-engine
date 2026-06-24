@@ -2,7 +2,7 @@
 skills proficiency.
 
 Background (claims_ledger.md ~line 87, feedback_no_coding_language_fluency):
-Sam does NOT claim unaided hand-coding fluency. On a resume skills line:
+The applicant does NOT claim unaided hand-coding fluency. On a resume skills line:
   - MATLAB must be DROPPED entirely (never a proficiency claim).
   - bare "Python" implies hand-coding fluency at rigorous-coding employers (Anthropic) and
     caused a calibration FAIL on JOB-237. Python may appear ONLY in the AI-orchestrated

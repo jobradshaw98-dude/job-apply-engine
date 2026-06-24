@@ -17,10 +17,10 @@ What the live form actually does (folded in below):
 
 SAFETY: every answer/widget-action method returns a VERIFIED bool — it drives the widget,
 reads back the _act state, and returns True ONLY if the chosen button is active (and the
-other is NOT). A False return means the orchestrator/finish MUST HALT to Sam; a phantom
+other is NOT). A False return means the orchestrator/finish MUST HALT to the user; a phantom
 answer (the one unrecoverable wrong-answer field, work-auth) is never recorded. Label-
 substring matching for custom button-groups NEVER touches a work-auth or EEO control —
-those are owned by the work-auth guard / left for Sam.
+those are owned by the work-auth guard / left for the user.
 """
 import re
 
@@ -164,7 +164,7 @@ class AshbyAdapter(FormAdapterBase):
 
         Verified contract: click the target Yes/No button, then read back — return True ONLY if
         the chosen button now carries an `_act` class AND the other button does NOT. A False
-        means the click didn't register; the caller HALTs to Sam rather than record a phantom
+        means the click didn't register; the caller HALTs to the user rather than record a phantom
         work-auth answer."""
         if q.kind == "button-yesno":
             block = self._relocate_button_block(page, q.label)
@@ -244,7 +244,7 @@ class AshbyAdapter(FormAdapterBase):
         react-selects, but for Ashby's button widget.
 
         HARD SAFETY: never touches a control whose label classifies as work-auth or EEO — those
-        are owned by the work-auth guard / left for Sam, and a label-substring match
+        are owned by the work-auth guard / left for the user, and a label-substring match
         ('authorized', 'gender', etc.) must never drive them here. Returns False if no matching
         non-work-auth/non-EEO block is found, or the click didn't verify."""
         sub = (label_substr or "").strip().lower()

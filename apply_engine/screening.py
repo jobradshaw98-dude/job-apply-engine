@@ -2,7 +2,7 @@
 
 The choice-picker (choice_gen.resolve_choice) DECLINEs self-assessment / judgment-call
 questions, so it escalated EVERY binary Yes/No screening qualifier ("3+ years experience?",
-"deployed AI in production?") to Sam — even the ones that are a clear, truthful Yes. This
+"deployed AI in production?") to the user — even the ones that are a clear, truthful Yes. This
 module answers those, and ONLY those, while keeping the work_auth.py safety discipline:
 
   * a decision is VERIFIED — YES/NO is mapped to a real offered option, or it ESCALATES;
@@ -22,13 +22,16 @@ from . import config
 from .work_auth import classify_work_auth, WorkAuthDecision
 from .choice_gen import Choice, resolve_choice
 
+# Prefer the user-supplied real file (git-ignored); fall back to the committed example (the
+# fictional demo applicant) — mirrors VOICE/voice_profile.example.md.
 CAPABILITIES_FILE = config.PKG_DIR / "capabilities.md"
+CAPABILITIES_EXAMPLE = config.PKG_DIR / "capabilities.example.md"
 
 
 class ScreeningDecision(str, Enum):
     YES = "yes"
     NO = "no"
-    ESCALATE = "escalate"      # ambiguous / unsupported / excluded -> leave for Sam
+    ESCALATE = "escalate"      # ambiguous / unsupported / excluded -> leave for the user
     UNRELATED = "unrelated"    # not a binary Yes/No -> caller uses the generic picker
 
 
@@ -61,7 +64,7 @@ def is_yesno_screening(options) -> bool:
 # every stem-prefix entry (`relocat`+`\b` cannot match "relocate", `disab` cannot match
 # "disability", etc.), silently leaking those classes to the model. The leading boundary still
 # prevents substring false-matches like "race" inside "embrace". Over-exclusion here is the SAFE
-# failure mode (it escalates to Sam), so stems are preferred over exhaustive word lists.
+# failure mode (it escalates to the user), so stems are preferred over exhaustive word lists.
 _EXCLUDED_PATTERNS = re.compile(
     r"\b(?:"
     # EEO / demographic
@@ -96,7 +99,7 @@ _NEGATION = re.compile(
 )
 
 
-# NOTE on coding questions (Sam 2026-06-09): these are NOT excluded. Sam codes Python via LLM
+# NOTE on coding questions (2026-06-09): these are NOT excluded. The applicant codes Python via LLM
 # harnesses (Claude Code/Codex) and ships/operates production software that way, so coding /
 # experience / proficiency questions are answered TRUTHFULLY (capabilities.md grounds them YES, and
 # the explicitly-unaided "from scratch / without AI" variant NO). The job is best honest wording,
@@ -114,9 +117,9 @@ def _is_excluded(question: str) -> bool:
 
 def build_screening_prompt(question: str, capabilities: str) -> str:
     return (
-        "You are answering a binary YES/NO screening qualifier on Sam Rivera's job\n"
+        "You are answering a binary YES/NO screening qualifier on the applicant's job\n"
         "application. Use ONLY the CAPABILITY FACTS below — they are the sole source of truth\n"
-        "about Sam.\n\n"
+        "about the applicant.\n\n"
         "Output EXACTLY one token, nothing else:\n"
         "  YES       — only if the CAPABILITY FACTS clearly and truthfully support a Yes.\n"
         "  NO        — only if the CAPABILITY FACTS clearly and truthfully support a No.\n"
@@ -150,7 +153,7 @@ def classify_screening(question, options, capabilities, llm_fn, audit_fn=None) -
 
     if _is_excluded(question):
         return ScreeningResult(ScreeningDecision.ESCALATE, "",
-                               "excluded class (work-auth/EEO/sensitive) — left for Sam")
+                               "excluded class (work-auth/EEO/sensitive) — left for the user")
 
     try:
         raw = (llm_fn(build_screening_prompt(question, capabilities)) or "").strip()
@@ -186,10 +189,12 @@ def classify_screening(question, options, capabilities, llm_fn, audit_fn=None) -
 
 
 def load_capabilities() -> str:
-    try:
-        return CAPABILITIES_FILE.read_text(encoding="utf-8")
-    except Exception:
-        return ""
+    for p in (CAPABILITIES_FILE, CAPABILITIES_EXAMPLE):
+        try:
+            return p.read_text(encoding="utf-8")
+        except Exception:
+            continue
+    return ""
 
 
 def resolve_with_screening(question, options, facts, capabilities, llm_fn, audit_fn) -> Choice:
@@ -205,5 +210,5 @@ def resolve_with_screening(question, options, facts, capabilities, llm_fn, audit
             return Choice(question, options, value=r.value, status="answered",
                           reason="screening: " + r.reason)
         return Choice(question, options, status="declined",
-                      reason="screening: " + (r.reason or "left for Sam"))
+                      reason="screening: " + (r.reason or "left for the user"))
     return resolve_choice(question, options, facts, llm_fn, audit_fn)

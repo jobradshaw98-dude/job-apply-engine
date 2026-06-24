@@ -35,13 +35,13 @@ def career_tree(tmp_path):
     root = tmp_path / "career"
     pkg = root / "apply_engine"
     pkg.mkdir(parents=True)
-    master = root / "Sam_Rivera_Resume_Master.pdf"
+    master = root / "APPLICANT_Resume_Master.pdf"
     master.write_text("MASTER", encoding="utf-8")
     appdir = root / "applications" / "APP-001-Acme"
     appdir.mkdir(parents=True)
-    tailored_resume = appdir / "SAM_RIVERA_Resume.pdf"
+    tailored_resume = appdir / "APPLICANT_Resume.pdf"
     tailored_resume.write_text("TAILORED", encoding="utf-8")
-    tailored_cover = appdir / "SAM_RIVERA_Cover_Letter.pdf"
+    tailored_cover = appdir / "APPLICANT_Cover_Letter.pdf"
     tailored_cover.write_text("COVER", encoding="utf-8")
     return _CfgStub(pkg), {"master": master, "tailored_resume": tailored_resume,
                            "tailored_cover": tailored_cover, "appdir": appdir}
@@ -56,9 +56,9 @@ def _ready_record(paths, **over):
         "submitted": False,
         "uploaded_docs": [
             {"doc": "resume", "path": str(paths["tailored_resume"]),
-             "name": "SAM_RIVERA_Resume.pdf"},
+             "name": "APPLICANT_Resume.pdf"},
             {"doc": "cover", "path": str(paths["tailored_cover"]),
-             "name": "SAM_RIVERA_Cover_Letter.pdf"},
+             "name": "APPLICANT_Cover_Letter.pdf"},
         ],
         "work_auth": [{"field": "sponsor", "answer": "No"}],
         "custom_qs": [],
@@ -108,7 +108,7 @@ def test_verify_ready_fails_on_master_resume(career_tree):
     cfg, paths = career_tree
     rec = _ready_record(paths)
     rec["uploaded_docs"] = [{"doc": "resume", "path": str(paths["master"]),
-                             "name": "Sam_Rivera_Resume_Master.pdf"}]
+                             "name": "APPLICANT_Resume_Master.pdf"}]
     ok, reason = verify_ready(rec, cfg)
     assert ok is False
     assert "master" in reason.lower()

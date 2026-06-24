@@ -80,7 +80,7 @@ def test_plain_text_location_input_filled(fixture_server, tmp_path):
 
 def test_location_no_options_for_any_candidate_escalates(fixture_server, tmp_path):
     """If the geo service returns nothing for every candidate (no real match), the driver must
-    NOT force a wrong value — it leaves the field blank so completeness escalates it to Sam.
+    NOT force a wrong value — it leaves the field blank so completeness escalates it to the user.
     Simulated by asking for a city that isn't in the fixture's GEO list."""
     a = GreenhouseAdapter()
     answers = dict(ANSWERS, city="Zzhbphakeville")

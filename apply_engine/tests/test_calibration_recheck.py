@@ -136,7 +136,7 @@ def test_recheck_fake_llm_is_call_tracker():
     assert out["verdict"] == "FAIL"
 
 
-# ---- 6. no em-dash in the FAIL summary (Sam's hard ban on new user-facing strings) ----
+# ---- 6. no em-dash in the FAIL summary (the user's hard ban on new user-facing strings) ----
 
 def test_recheck_summary_has_no_emdash():
     llm = _Tracker(_cal_payload([_viol("leads_with_cad", evidence="Expert SolidWorks modeler")]))

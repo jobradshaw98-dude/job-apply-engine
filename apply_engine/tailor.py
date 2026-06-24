@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """JD-driven LLM resume + cover-letter tailoring generator.
 
-This is the core of Sam's apply-pipeline QUALITY CONTRACT: every job he selects gets a
+This is the core of the apply-pipeline QUALITY CONTRACT: every job the applicant selects gets a
 FULL TAILORED resume+cover package specific to that job description. This module's entire
 reason to exist is to REFUSE generic output — it never falls back to the master resume, and
 it HALTs (raises) rather than degrade when the JD is too thin or the LLM output fails the
@@ -27,7 +27,7 @@ consume, confirmed against the gold example APP-023 in applications.json):
       }
     }
 
-LLM infra: reuses `apply_engine/llm.py::make_claude_llm()`, which runs on Sam's Claude
+LLM infra: reuses `apply_engine/llm.py::make_claude_llm()`, which runs on the user's Claude
 SUBSCRIPTION via `claude -p` headless (zero metered-API spend — hard rule). It raises
 `LLMUnavailable` if claude isn't on PATH; we propagate that and never fall back to anything.
 
@@ -49,7 +49,8 @@ import sys
 from pathlib import Path
 
 from . import config
-from .llm import RESUME, VOICE, RESUME_RULES_FILE, make_claude_llm
+from .llm import (RESUME, VOICE, RESUME_RULES_FILE, RESUME_RULES_EXAMPLE,
+                  _first_existing, make_claude_llm)
 
 # filemutex guards every applications.json write in the concurrent apply pipeline
 # (feedback_apply_queue_concurrency: file writes MUST be mutex-guarded). We import it lazily at
@@ -87,7 +88,7 @@ class TailorError(RuntimeError):
 # safety net for the rules in memory/feedback_*.md that are interview-exposure-critical.
 
 # Meridian-context tokens. If "ANSYS" appears in the same text entry as any of these, that
-# entry implies current Meridian ANSYS use, which is FALSE and gets Sam caught in interview.
+# entry implies current Meridian ANSYS use, which is FALSE and gets the applicant caught in interview.
 _MERIDIAN_CONTEXT = re.compile(r"meridian|woods|quantum|max\s*d|apex\s*uw|mini\s*driver|fairway",
                                re.IGNORECASE)
 # State University / MASc / Helix Robotics context. ANSYS is ONLY legitimate where one of these appears
@@ -108,7 +109,7 @@ _ADOPTED_FRAMEWORKS = re.compile(
     r"\b(framework|agentic|workflow)[^.]{0,80}\badopt\w*",
     re.IGNORECASE,
 )
-# Coding-fluency proficiency guard (skills rows ONLY). Sam does NOT claim unaided hand-coding
+# Coding-fluency proficiency guard (skills rows ONLY). The applicant does NOT claim unaided hand-coding
 # fluency (claims_ledger.md ~87, feedback_no_coding_language_fluency). On a skills line:
 #   - "MATLAB" is dropped entirely — any MATLAB token in a skills row is a reject.
 #   - "Python" is allowed ONLY in the AI-orchestrated framing the master resume uses
@@ -230,12 +231,12 @@ def _collect_violations(pkg: dict, *, scope: str = "both") -> list:
                 f"{label}: says the agentic frameworks were 'adopted' — they are 'rolling out', "
                 f"not yet adopted")
         # Coding-fluency proficiency guard — SKILLS rows only. A skills line is a proficiency
-        # inventory, so a bare Python/MATLAB token there reads as hand-coding fluency Sam does
+        # inventory, so a bare Python/MATLAB token there reads as hand-coding fluency the applicant does
         # not claim (the exact mis-framing that FAILed JOB-237 calibration).
         if kind == "skills":
             if _MATLAB.search(text):
                 violations.append(
-                    f"{label}: lists MATLAB as a skill — MATLAB must be dropped entirely; Sam "
+                    f"{label}: lists MATLAB as a skill — MATLAB must be dropped entirely; the applicant "
                     f"does not claim it as a coding proficiency (claims_ledger.md)")
             # Remove every AI-orchestrated-framed Python mention; any Python token left is bare.
             residual = _PYTHON_AI_FRAMED.sub("", text)
@@ -372,11 +373,11 @@ deterministic guard, so do not even get close):
 2. NEVER mention "MobilityCo" anywhere. Treat it as if it never happened.
 3. NEVER mention "Signal Intel" or "ariasignals" anywhere.
 4. NEVER write the "$198M" portfolio figure (or "198 million") anywhere — it is confidential.
-5. The agentic frameworks Sam built at Meridian are "rolling out" across R&D — they are NOT
+5. The agentic frameworks the applicant built at Meridian are "rolling out" across R&D — they are NOT
    yet "adopted". Never say "adopted"; say "rolling out" / "being rolled out".
-6. Do NOT lead with CAD. Sam's hands-on CAD seat-time is limited. Lead with simulation,
+6. Do NOT lead with CAD. The applicant's hands-on CAD seat-time is limited. Lead with simulation,
    optimization, and test-to-simulation correlation. Never write "expert in SolidWorks/NX",
-   never imply he "designed"/"modeled" parts from scratch in CAD.
+   never imply they "designed"/"modeled" parts from scratch in CAD.
 7. Assert only what the resume FACTS support. Do not invent tools, numbers, employers, metrics,
    or outcomes. Do not name a technology unless it appears in the FACTS.
 8. ARIA / any personal project is personal, single-user, daily-use — NEVER "production",
@@ -384,7 +385,7 @@ deterministic guard, so do not even get close):
 9. Codex = the Meridian R&D automation tools. Claude Code = the personal ARIA platform. Never
    swap them.
 10. The skills list must NEVER contain a bare "Python" or "MATLAB" as a coding proficiency.
-    Sam does NOT hand-code — he builds automation by orchestrating AI agents (Codex, Claude
+    The applicant does NOT hand-code — they build automation by orchestrating AI agents (Codex, Claude
     Code). DROP "MATLAB" entirely. Python may appear ONLY framed as AI-orchestrated tooling
     (e.g. "Python-based tooling, AI-orchestrated rather than hand-coded", "AI-orchestrated
     Python-based analysis automation"), never as a standalone skill token like "... · Python".
@@ -411,13 +412,13 @@ Return STRICT JSON (and NOTHING else — no prose, no markdown fence) with exact
 {
   "addressee":  "Hiring Manager<br>{Company} &mdash; {Team/Function}<br>{City, ST}",
   "salutation": "Dear Hiring Manager,",
-  "paragraphs": ["P1", "P2", "P3", "P4"]     // exactly 4: (P1) role+company hook + why-him, (P2) Meridian+MASc evidence mapped to the JD with a concrete named project, (P3) the cross-domain differentiator + one company-specific paragraph nobody else could write, (P4) short warm close
+  "paragraphs": ["P1", "P2", "P3", "P4"]     // exactly 4: (P1) role+company hook + why-them, (P2) Meridian+MASc evidence mapped to the JD with a concrete named project, (P3) the cross-domain differentiator + one company-specific paragraph nobody else could write, (P4) short warm close
 }
 """
 
 
 def _job_header(job: dict, *, master_text: str) -> str:
-    """The shared context every call needs: the target job, the JD, and Sam's FACTS."""
+    """The shared context every call needs: the target job, the JD, and the applicant's FACTS."""
     company = job.get("company", "")
     role = job.get("role") or job.get("title") or ""
     track = job.get("track")
@@ -427,10 +428,10 @@ Company: {company}
 Role: {role}
 Track: {track}
 
-## JOB DESCRIPTION (the requirements to map against — not a source of facts about Sam)
+## JOB DESCRIPTION (the requirements to map against — not a source of facts about the applicant)
 {jd}
 
-# SAM'S FACTS (the ONLY source of truth for what he has done — master resume)
+# THE APPLICANT'S FACTS (the ONLY source of truth for what they have done — master resume)
 {master_text}"""
 
 
@@ -438,8 +439,8 @@ def _build_resume_prompt(job: dict, *, master_text: str, rules_text: str) -> str
     """Call A — produce ONLY the resume dict. Gets the resume-format learned rules; no cover/voice
     block (the cover call owns voice/craft), keeping this prompt small so it clears the 240s cap."""
     rules_section = ("\n\n# LEARNED RESUME/STYLE RULES\n" + rules_text) if rules_text.strip() else ""
-    return f"""You are tailoring Sam Rivera's RESUME bullets to ONE specific job. \
-Map the job description's real requirements to Sam's genuine experience. Do NOT stretch, infer, \
+    return f"""You are tailoring the applicant's RESUME bullets to ONE specific job. \
+Map the job description's real requirements to the applicant's genuine experience. Do NOT stretch, infer, \
 or fabricate a connection that the FACTS don't support.
 
 {_job_header(job, master_text=master_text)}{rules_section}
@@ -469,10 +470,10 @@ or fabricate a connection that the FACTS don't support.
 def _build_cover_prompt(job: dict, *, master_text: str, voice_text: str) -> str:
     """Call B — produce ONLY the cover dict. Gets the voice/craft block (cover-letter writing);
     no resume-format rules, keeping this prompt small so it clears the 240s cap."""
-    voice_section = ("\n\n# VOICE & CRAFT (how Sam writes — style, NOT new facts)\n" + voice_text
+    voice_section = ("\n\n# VOICE & CRAFT (how the applicant writes — style, NOT new facts)\n" + voice_text
                      ) if voice_text.strip() else ""
-    return f"""You are writing Sam Rivera's COVER LETTER for ONE specific job. \
-Map the job description's real requirements to Sam's genuine experience. Do NOT stretch, infer, \
+    return f"""You are writing the applicant's COVER LETTER for ONE specific job. \
+Map the job description's real requirements to the applicant's genuine experience. Do NOT stretch, infer, \
 or fabricate a connection that the FACTS don't support.
 
 {_job_header(job, master_text=master_text)}{voice_section}
@@ -480,8 +481,8 @@ or fabricate a connection that the FACTS don't support.
 {_HARD_RULES_BLOCK}
 
 # YOUR TASK (COVER LETTER ONLY — do NOT write resume bullets)
-Draft a 4-paragraph cover letter that maps JD requirements -> Sam's evidence, leading with
-Meridian + MASc, in his voice. At most ONE em-dash in the whole letter. Earn at least one
+Draft a 4-paragraph cover letter that maps JD requirements -> the applicant's evidence, leading with
+Meridian + MASc, in their voice. At most ONE em-dash in the whole letter. Earn at least one
 paragraph that no other candidate could have written about THIS company.
 
 {_COVER_SCHEMA_BLOCK}"""
@@ -491,7 +492,7 @@ _REPROMPT = ("Your previous response was not valid JSON. Return ONLY a single va
              "matching the schema — no prose, no markdown code fence, nothing else.\n\n")
 
 # Max self-correction reprompts per call AFTER the original attempt. 2 repairs => 3 total tries
-# (original + 2). Sam: quality over speed for this generator — a few extra calls is acceptable.
+# (original + 2). Quality over speed for this generator — a few extra calls is acceptable.
 _MAX_REPAIRS = 2
 
 
@@ -590,7 +591,7 @@ def generate_tailored_package(job: dict, *, llm=None, master_path=None) -> dict:
     if not master_text.strip():
         raise TailorError(f"master resume not found / empty at {master_path or RESUME}")
     voice_text = _read_text(VOICE)
-    rules_text = _read_text(RESUME_RULES_FILE)
+    rules_text = _read_text(_first_existing(RESUME_RULES_FILE, RESUME_RULES_EXAMPLE))
 
     # TWO sequential focused calls instead of one combined prompt. The one-shot prompt (resume +
     # cover in a single JSON) measured ~239s — right at make_claude_llm's 240s subprocess cap, so

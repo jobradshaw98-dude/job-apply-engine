@@ -31,10 +31,10 @@ def _record(appdir: Path, **over) -> dict:
         "status": "ready_to_submit",
         "submitted": False,
         "uploaded_docs": [
-            {"doc": "resume", "path": str(appdir / "SAM_RIVERA_Resume.pdf"),
-             "name": "SAM_RIVERA_Resume.pdf"},
-            {"doc": "cover", "path": str(appdir / "SAM_RIVERA_Cover_Letter.pdf"),
-             "name": "SAM_RIVERA_Cover_Letter.pdf"},
+            {"doc": "resume", "path": str(appdir / "APPLICANT_Resume.pdf"),
+             "name": "APPLICANT_Resume.pdf"},
+            {"doc": "cover", "path": str(appdir / "APPLICANT_Cover_Letter.pdf"),
+             "name": "APPLICANT_Cover_Letter.pdf"},
         ],
         "work_auth": [{"field": "sponsor", "answer": "No"}],
         "custom_qs": [{"q": "Why us?", "kind": "essay", "status": "answered", "value": "x"}],
@@ -51,8 +51,8 @@ def _record(appdir: Path, **over) -> dict:
 def _setup(tmp_path, monkeypatch, rec):
     appdir = tmp_path / "career" / "applications" / "APP-001-Acme"
     appdir.mkdir(parents=True)
-    (appdir / "SAM_RIVERA_Resume.pdf").write_text("R", encoding="utf-8")
-    (appdir / "SAM_RIVERA_Cover_Letter.pdf").write_text("C", encoding="utf-8")
+    (appdir / "APPLICANT_Resume.pdf").write_text("R", encoding="utf-8")
+    (appdir / "APPLICANT_Cover_Letter.pdf").write_text("C", encoding="utf-8")
     data_dir = tmp_path / "data"
     data_dir.mkdir()
     monkeypatch.setattr(_cfg, "ARIA_DATA", data_dir)

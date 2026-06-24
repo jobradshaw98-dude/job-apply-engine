@@ -1,9 +1,15 @@
-# Capability facts — Sam Rivera (truthful Yes/No grounding for screening qualifiers)
+# Capability facts (EXAMPLE — fictional applicant "Sam Rivera")
+
+> **This is a filled-in EXAMPLE for the fictional applicant Sam Rivera.** Copy it to
+> `capabilities.md` (git-ignored) and replace every fact below with your own truthful Yes/No
+> grounding. Keep the classifier rules and the section structure — those are general; swap out the
+> identity-bound facts. The engine prefers your real `capabilities.md` and only falls back to this
+> example (with a warning) when it is absent.
 
 This is the ONLY source the screening classifier (`screening.py`) may use to answer a binary
 Yes/No screening qualifier on a job application. It exists so the engine can truthfully answer
 clear qualifiers ("3+ years experience?", "deployed AI in production?") instead of punting every
-one to Sam — WITHOUT ever fabricating a Yes.
+one to the user — WITHOUT ever fabricating a Yes.
 
 Rules for the classifier:
 - Answer **YES** when a "Clear YES" line below covers the question — answer it **confidently**,

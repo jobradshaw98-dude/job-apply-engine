@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Regenerate ONE staged custom-question answer per a Sam instruction, re-run the
+"""Regenerate ONE staged custom-question answer per a user instruction, re-run the
 deterministic accuracy gate, and write the result back to staged_applications.json.
 
 Launched DETACHED by the ARIA dashboard's /apply-queue/<job>/request-edit endpoint, so
@@ -11,8 +11,8 @@ explicitly told to stay within the FACTS.
     python -m apply_engine.regen_answer JOB-131 --question "..." --revert
     python -m apply_engine.regen_answer JOB-216 --question "..." --provide "Yes"
 
---provide writes Sam's OWN words onto the question (status=answered, answered_by=sam).
-It runs NO LLM and NO accuracy gate — Sam's answer is final. It also prunes the matching
+--provide writes the user's OWN words onto the question (status=answered, answered_by=sam).
+It runs NO LLM and NO accuracy gate — the user's answer is final. It also prunes the matching
 item out of the record's top-level needs_sam list so the card's "Still needs you" count
 drops. A --provide answer deliberately leaves edit_request empty so it never trips the
 "edited — needs a fresh accuracy review" submit block (that block is only for AI rewrites).
@@ -194,7 +194,7 @@ def _is_multi_kind(kind):
 
 
 def _do_provide(manifest, job_id, target, question, text):
-    """Write Sam's OWN answer: value/values + status=answered, clear the AI-review machinery
+    """Write the user's OWN answer: value/values + status=answered, clear the AI-review machinery
     (reason/review_findings), stamp answered_by=sam, append a 'provided' edit_history row,
     prune the matching needs_sam item, MERGE-WRITE. NO LLM, NO gate.
 
@@ -204,7 +204,7 @@ def _do_provide(manifest, job_id, target, question, text):
     needs_sam-only branch; the actual writes go onto the fresh objects.
 
     edit_request is deliberately NOT set: the server submit gate blocks any custom_q carrying
-    an edit_request (an AI rewrite awaiting re-review). Sam's own words need no re-review,
+    an edit_request (an AI rewrite awaiting re-review). the user's own words need no re-review,
     so leaving edit_request empty keeps this answer from blocking submit."""
     kind = (target.get("kind", "") or "") if target else ""
     qkey = _qkey(question)
@@ -230,13 +230,13 @@ def _do_provide(manifest, job_id, target, question, text):
             fresh_target["reason"] = ""
             fresh_target["review_findings"] = []
             fresh_target["answered_by"] = "sam"
-            # Never carry an edit_request on a Sam-provided answer (see docstring).
+            # Never carry an edit_request on a user-provided answer (see docstring).
             fresh_target["edit_request"] = ""
             # APPEND to the fresh list — never replace it; a concurrent sibling edit may have
             # appended its own history row that we must not drop.
             fresh_target.setdefault("edit_history", []).append({
                 "ts": _local_iso(),
-                "instruction": "(provided by Sam)",
+                "instruction": "(provided by the user)",
                 "before": before,
                 "after": after,
                 "status": "provided",
@@ -244,7 +244,7 @@ def _do_provide(manifest, job_id, target, question, text):
             _ledger_answer(fresh_app, question, fresh_target["edit_history"][-1])
 
         # needs_sam-ONLY item (no staged custom_q widget): CREATE a real custom_q so the
-        # deterministic finish.replay path will re-type Sam's answer into the live form.
+        # deterministic finish.replay path will re-type the user's answer into the live form.
         # The created entry stores the FULL needs_sam item text as `q` so
         # finish.match_custom_entry matches it to the live widget by normalized label.
         created = None
@@ -264,7 +264,7 @@ def _do_provide(manifest, job_id, target, question, text):
                     "edit_request": "",
                     "edit_history": [{
                         "ts": _local_iso(),
-                        "instruction": "(provided by Sam)",
+                        "instruction": "(provided by the user)",
                         "before": "",
                         "after": value,
                         "status": "provided",
@@ -279,7 +279,7 @@ def _do_provide(manifest, job_id, target, question, text):
         if fresh_target is None and created is None and pruned == 0:
             return ("notfound", 0)
 
-        # One-way valve: a needs_input record whose last blocker Sam just answered flips to
+        # One-way valve: a needs_input record whose last blocker the user just answered flips to
         # ready_to_submit. Recompute on the FRESH record so a sibling edit's resolution counts too.
         new_status = recompute_status(fresh_app)
         if new_status and new_status != (fresh_app.get("status") or ""):
@@ -555,14 +555,14 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="apply_engine.regen_answer")
     ap.add_argument("job_id")
     ap.add_argument("--question", required=True)
-    # --instruction (LLM edit), --revert (undo), --provide (Sam's own words) are
+    # --instruction (LLM edit), --revert (undo), --provide (the user's own words) are
     # mutually exclusive: exactly one mode per invocation.
     ap.add_argument("--instruction")
     ap.add_argument("--revert", action="store_true")
     ap.add_argument("--provide")
     # ITERATE-TO-CLEAN (engine-own fix path only): when N>1 and the gate rejects an --instruction
     # rewrite, re-prompt with the gate's specific complaint + ledger facts and regen AGAIN, up to N.
-    # DEFAULT 1 == today's single-pass behaviour EXACTLY (Sam's dashboard edits never pass N>1).
+    # DEFAULT 1 == today's single-pass behaviour EXACTLY (the user's dashboard edits never pass N>1).
     ap.add_argument("--max-attempts", type=int, default=1, dest="max_attempts")
     # G2 LENGTH target (engine-own length-fix path only). When set, an attempt that PASSES the
     # fabrication/disclosure gate is ALSO checked against the stated word range; an answer still
@@ -694,7 +694,7 @@ def _run(args):
         the previous attempt's specific ledger findings. Best-effort: [] on any failure."""
         try:
             jr = (llm(
-                "You are an honesty auditor for Sam Rivera's job-application answers. Below is his "
+                "You are an honesty auditor for the user Rivera's job-application answers. Below is his "
                 "VETTED CLAIMS LEDGER (the complete set of claims he is allowed to make) and a drafted "
                 "ANSWER. Identify every claim in the ANSWER — any number, metric, percentage, scope, tool, "
                 "employer, outcome, or stated interest — that is NOT supported by the ledger or is overstated "
@@ -756,7 +756,7 @@ def _run(args):
                 and kind == "essay" and not old_value.strip()):
             try:
                 polished = strip_editor_preamble((llm(build_refine_prompt(question, raw, facts) +
-                                "\n\nAlso honor this instruction from Sam, within the FACTS: "
+                                "\n\nAlso honor this instruction from the user, within the FACTS: "
                                 + args.instruction) or "").strip())
                 if polished and not polished.upper().startswith(DECLINE):
                     raw = polished
@@ -782,7 +782,7 @@ def _run(args):
                 raw = reprompted
             else:
                 # Still commentary (or empty/declined): do NOT land it. Preserve the prior answer
-                # and flag the record so Sam sees it — never silently store commentary.
+                # and flag the record so the user sees it — never silently store commentary.
                 new_value = ""
                 new_status_field = "needs_input"
                 new_reason = ("regen_produced_commentary: the rewrite returned commentary about the "
@@ -803,7 +803,7 @@ def _run(args):
         if not raw or raw.upper().startswith(DECLINE):
             # The model declined — it could not satisfy the edit within the facts. Terminal; no
             # value lands. A decline is the model telling us the premise is unsupportable, so on
-            # N>1 it classifies as an `unsupportable` residual (asking Sam won't ground it).
+            # N>1 it classifies as an `unsupportable` residual (asking the user won't ground it).
             new_value = ""
             new_status_field = "needs_input"
             new_reason = "requested edit could not be satisfied within the supported facts"

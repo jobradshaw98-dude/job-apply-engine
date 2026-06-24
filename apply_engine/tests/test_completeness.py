@@ -1,5 +1,5 @@
 """Completeness guard: 'ready_to_submit' must never hide a blank required field.
-Also resume-attachment detection. Implements Sam's rule (2026-05-31): ensure all
+Also resume-attachment detection. Implements the user's rule (2026-05-31): ensure all
 fields are filled, or report exactly which required ones still need him."""
 import pytest
 from apply_engine.browser import launch_profile

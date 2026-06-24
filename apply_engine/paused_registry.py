@@ -24,9 +24,9 @@ Example entry to paste into `paused_registry.json` -> `entries`:
       "status": "paused",
       "reason": "Pausing the unattended audit->fix->re-audit loop (claude -p quota / debugging).",
       "paused_since": "YYYY-MM-DD",
-      "unblock_condition": "Sam re-enables the autonomous convergence loop.",
+      "unblock_condition": "the user re-enables the autonomous convergence loop.",
       "memory_ref": null,
-      "owner": "Sam",
+      "owner": "the user",
       "do_not_alert": true
     }
 
