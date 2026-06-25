@@ -1,0 +1,15 @@
+{
+  "_comment": "Config for `career-engine engage run`. Copy to ARIA_CORE_DATA/engage_config.json and edit. Every lane that could fire an external action defaults OFF; a malformed file fails SAFE back to all-off. Bucket A (deterministic hygiene) is the only thing on by default.",
+
+  "enable_hygiene": true,
+  "enable_staging": false,
+  "enable_sourcing": false,
+  "enable_contact_linkedin": false,
+
+  "commit": false,
+
+  "min_fit": 7,
+  "source_cap": 3,
+  "stage_cap": 3,
+  "confidence_floor": 7
+}

@@ -1,0 +1,8 @@
+{
+  "entries": [
+    { "company": "Anthropic", "ats": "greenhouse", "slug": "anthropic" },
+    { "company": "Ramp", "ats": "ashby", "slug": "ramp" },
+    { "company": "Vercel", "ats": "greenhouse", "slug": "vercel" },
+    { "company": "Notion", "ats": "lever", "slug": "notion" }
+  ]
+}

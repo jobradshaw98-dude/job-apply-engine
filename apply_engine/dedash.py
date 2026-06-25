@@ -24,7 +24,7 @@ safety net if a rewrite somehow keeps too many.
 
 This module does NOT run automatically. Invoke it explicitly:
 
-    cd job-apply-engine
+    cd career-engine
     .venv/Scripts/python.exe -m apply_engine.dedash            # all staged apps
     .venv/Scripts/python.exe -m apply_engine.dedash JOB-131    # one app
 

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "HOLD-001",
+    "title": "Forward Deployed Engineer",
+    "company": "Northwind Labs",
+    "url": "",
+    "jd_text": "",
+    "location": "Remote (US)",
+    "source": "discover",
+    "date_added": "2026-01-15",
+    "attempts": 0,
+    "notes": "Sample stub: no direct URL or JD yet — `qualify run` would try to resolve the company+title to a direct ATS posting, fetch the JD, then gate + score it. Replace with your own discovered leads."
+  },
+  {
+    "id": "HOLD-002",
+    "title": "Applied AI Engineer",
+    "company": "Meridian Systems",
+    "url": "https://example.com/careers",
+    "jd_text": "Short blurb only.",
+    "location": "Austin, TX",
+    "source": "discover",
+    "date_added": "2026-01-15",
+    "attempts": 0,
+    "notes": "Sample stub: only a careers-homepage URL and a thin JD, so it fails the enrichment gate and is HELD for another resolve/fetch attempt next run (never promoted on thin content)."
+  },
+  {
+    "id": "HOLD-003",
+    "title": "Solutions Engineer, AI",
+    "company": "Cobalt Robotics",
+    "url": "https://jobs.lever.co/cobalt/00000000-0000-0000-0000-000000000003",
+    "jd_text": "",
+    "location": "Denver, CO",
+    "source": "discover",
+    "date_added": "2026-01-15",
+    "attempts": 0,
+    "notes": "Sample stub: already has a direct Lever posting URL, so `qualify run` would fetch the full JD from the Lever posting API, gate it, score it against your rubric, and promote it to jobs.json as the next JOB-NNN."
+  }
+]

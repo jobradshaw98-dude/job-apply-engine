@@ -1,0 +1,56 @@
+[
+  {
+    "id": "CON-001",
+    "name": "Priya Raman",
+    "company": "Meridian Robotics",
+    "role": "Engineering Manager, Perception",
+    "warmth": 2,
+    "status": "contacted",
+    "stream": "applied-ai",
+    "last_contact": "2026-06-01",
+    "linkedin_url": "https://www.linkedin.com/in/priya-raman-example",
+    "notes": "Met at an Austin robotics meetup. Open to a referral chat.",
+    "outreach": {
+      "channel": "linkedin",
+      "subject": "",
+      "body": "Hi Priya — enjoyed your talk on sim-to-real for pick-and-place. I just shipped a small grasp-planning demo and would love your read on the perception roadmap at Meridian.",
+      "verify": { "ok": false, "status": "unverified" }
+    }
+  },
+  {
+    "id": "CON-002",
+    "name": "Marcus Bell",
+    "company": "Lumen Analytics",
+    "role": "Founder",
+    "warmth": 1,
+    "status": "prospect",
+    "stream": "data-platform",
+    "last_contact": null,
+    "notes": "Cold prospect — strong fit for the forward-deployed role.",
+    "outreach": {
+      "channel": "linkedin",
+      "subject": "",
+      "body": "",
+      "verify": { "ok": false, "status": "unverified" }
+    }
+  },
+  {
+    "id": "CON-003",
+    "name": "Dana Okonkwo",
+    "company": "Northwind Health",
+    "role": "Staff Software Engineer",
+    "warmth": 3,
+    "status": "replied",
+    "stream": "health-ml",
+    "last_contact": "2026-05-20",
+    "next_follow_up": "2026-05-27",
+    "linkedin_url": "https://www.linkedin.com/in/dana-okonkwo-example",
+    "notes": "Replied warmly, suggested a coffee in two weeks.",
+    "outreach": {
+      "channel": "email",
+      "subject": "Following up on our chat",
+      "body": "Thanks again Dana — circling back as promised. Free for a quick coffee next week?",
+      "verify": { "ok": false, "status": "unverified" }
+    }
+  }
+]

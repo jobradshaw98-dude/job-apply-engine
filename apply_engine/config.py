@@ -13,6 +13,12 @@ ARIA_DATA = Path(os.environ.get("ARIA_CORE_DATA", str(REPO_ROOT / "data")))
 JOBS_JSON = ARIA_DATA / "jobs.json"
 APPLICATIONS_JSON = ARIA_DATA / "applications.json"
 STAGED_MANIFEST = ARIA_DATA / "staged_applications.json"  # the apply-queue staged-record manifest
+HOLDING_JSON = ARIA_DATA / "holding.json"  # raw discovered stubs awaiting qualify (source -> qualify hand-off)
+
+# Fit-scoring rubric the qualify pass scores each posting against. Defaults to the
+# bundled generic example; point FIT_RUBRIC at your own rubric (describe the candidate
+# you're scoring for) via the env var, or drop one in your ARIA_CORE_DATA folder.
+FIT_RUBRIC = Path(os.environ.get("FIT_RUBRIC", str(EXAMPLES_DIR / "fit_rubric.example.md")))
 
 RUNS_DIR = PKG_DIR / "runs"              # per-job run artifacts (git-ignored)
 PROFILE_DIR = PKG_DIR / "profile"        # dedicated bot Chrome user-data-dir (git-ignored)
