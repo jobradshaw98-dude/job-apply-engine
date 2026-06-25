@@ -509,11 +509,11 @@ def _apply_to_job(job: dict, answers, runs_root: Path, profile_dir: Path,
             from .work_auth_policy import WorkAuthResolution
             for q in adapter.find_work_auth_questions(page):
                 # G4: the answer comes from POLICY + GEOGRAPHY (resolve_work_auth), NOT from a
-                # possibly-wrong staged value (the Scale-AI bug: staged sponsorship="Yes"). The
-                # resolver also catches a FOREIGN role (e.g. Cresta "Australia (Remote)") and returns
-                # NEEDS_HUMAN — the applicant is authorized in the US, so auto-answering "Yes" for a
-                # country he isn't authorized in is a truthfulness violation. It halts into a
-                # work_auth human_blocker instead of auto-Yes.
+                # possibly-wrong staged value (a real bug: staged sponsorship="Yes"). The resolver
+                # also catches a FOREIGN role (e.g. "Australia (Remote)") and returns NEEDS_HUMAN —
+                # the applicant is authorized in the US, so auto-answering "Yes" for a country they
+                # aren't authorized in is a truthfulness violation. It halts into a work_auth
+                # human_blocker instead of auto-Yes.
                 resolution = resolve_work_auth(q.label, role_location)
                 ctx.log("work_auth", q.label, decision=resolution.value, widget=q.kind,
                         role_location=role_location)

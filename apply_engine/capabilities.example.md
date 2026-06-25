@@ -83,7 +83,7 @@ named library.
 - **Finite element analysis (FEA) / structural simulation** — YES. Core expertise (LS-DYNA +
   HyperWorks at Meridian; ANSYS in graduate research).
 - **Design / numerical optimization, test-to-simulation correlation** — YES. Core expertise.
-- **Authorized to work in the US** — YES (TN visa). NOTE: work-authorization, sponsorship, visa
+- **Authorized to work in the US** — YES. NOTE: work-authorization, sponsorship, visa
   and citizenship questions are NOT answered here — they are owned by `work_auth.py`. The
   screening classifier must ESCALATE them; this line is context only.
 

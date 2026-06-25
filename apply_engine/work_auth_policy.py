@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """G4 — work-authorization RESOLVER + geography blocker (design doc §8.2 / §4 `work_auth`).
 
-The Scale-AI / Cresta live run (2026-06-11) exposed two distinct work-auth failure modes the
-classifier alone could not cover:
+An early live run exposed two distinct work-auth failure modes the classifier alone could not cover:
 
   1. The engine trusted a STAGED `record.work_auth` value that was WRONG (sponsorship="Yes").
      The fix is to compute the answer from POLICY every time, never from a possibly-corrupt
      staged value.
-  2. A role based in a DIFFERENT country (Cresta = "Australia (Remote)") was auto-answered "Yes,
-     authorized" — but the applicant is authorized in their home country, NOT in Australia. Auto-clearing a
+  2. A role based in a DIFFERENT country (e.g. "Australia (Remote)") was auto-answered "Yes,
+     authorized" — but the applicant is authorized in their own country, NOT in Australia. Auto-clearing a
      foreign work-auth screen is a TRUTHFULNESS violation. A foreign role is a HUMAN-ONLY blocker
      (answerable tier), never an auto-Yes.
 
@@ -19,16 +18,16 @@ locked policy answers stay in one place), then applies the GEOGRAPHY gate on top
   * role is US-based (or location unknown/ambiguous, which defaults to the common US path) and the
     question is a sponsorship/authorization screen  -> the locked no-red-flag answer
     (authorized=Yes, sponsorship=No, combined=Yes).
-  * role is based in a DIFFERENT country where US TN authorization does NOT apply (e.g. "Australia
+  * role is based in a DIFFERENT country where US work authorization does NOT apply (e.g. "Australia
     (Remote)", "London, UK", "Toronto, Canada")     -> NEEDS_HUMAN (geography mismatch): the
     engine must HALT the question into a `work_auth` human_blocker, NEVER auto-Yes.
   * citizenship / visa / ambiguous immigration question (classifier HALT, independent of geography)
     -> NEEDS_HUMAN.
   * the question is not a work-auth question                                 -> UNRELATED.
 
-Policy invariants (feedback_work_auth_answer_policy): clear the US screen with no immigration red
-flags; explain nuance to a human later; NEVER surface GC/marriage context anywhere. This module
-emits only Yes/No decisions and a NEEDS_HUMAN signal — it never writes any private context.
+Policy invariants: clear the US screen with no immigration red flags; explain nuance to a human
+later; NEVER surface private immigration context anywhere. This module emits only Yes/No decisions
+and a NEEDS_HUMAN signal — it never writes any private context.
 
 PURE: no browser, no I/O, no clock. The caller (orchestrator) drives the widget + builds the
 human_blocker; this module only decides WHAT the answer is (or that only the user can give it).
@@ -54,7 +53,7 @@ class WorkAuthResolution(str, Enum):
     UNRELATED = "unrelated"
 
 
-# The applicant's authorized country (TN visa). A role based here gets the locked no-red-flag
+# The applicant's work-authorized country (US). A role based here gets the locked no-red-flag
 # answer; a role based in any other identifiable country is a geography mismatch -> NEEDS_HUMAN.
 _US_TOKENS = (
     "united states", "u.s.a", "u.s.", "usa", "us", "america",
@@ -73,7 +72,7 @@ _US_METROS = (
     "mountain view", "palo alto", "sunnyvale", "cupertino", "redmond", "remote (us",
     "remote - us", "remote, us", "us remote", "remote us",
 )
-# Identifiable NON-US country / city signals -> geography mismatch (US TN does not authorize here).
+# Identifiable NON-US country / city signals -> geography mismatch (US work auth does not extend here).
 # Kept explicit (not "anything that isn't US") so an unknown/blank location defaults to the common
 # US path rather than wrongly halting every domestic role with a sparse location string.
 _FOREIGN_TOKENS = (
@@ -144,7 +143,7 @@ def resolve_work_auth(question_text: str, role_location: Optional[str]) -> WorkA
     See module docstring for the full decision table. Summary:
       * not a work-auth question                          -> UNRELATED
       * citizenship/visa/ambiguous (classifier HALT)      -> NEEDS_HUMAN
-      * sponsorship/authorization question AND role is FOREIGN (US TN doesn't authorize there)
+      * sponsorship/authorization question AND role is FOREIGN (US auth doesn't extend there)
                                                           -> NEEDS_HUMAN (geography mismatch)
       * sponsorship/authorization question AND role is US/unknown -> the locked no-red-flag answer
         (sponsorship->SPONSORSHIP_NO, authorized->AUTHORIZED_YES, combined->AUTHORIZED_NO_SPONSORSHIP)
@@ -159,7 +158,7 @@ def resolve_work_auth(question_text: str, role_location: Optional[str]) -> WorkA
         return WorkAuthResolution.NEEDS_HUMAN
 
     # This is a sponsorship/authorization SCREEN. The locked answer only applies where the applicant is
-    # actually authorized (US, TN). For a role based abroad, auto-answering "Yes, authorized" is a
+    # actually authorized (US-based). For a role based abroad, auto-answering "Yes, authorized" is a
     # truthfulness violation -> hand the whole question to the user (answerable human_blocker).
     geo = classify_role_location(role_location)
     if geo == "foreign":

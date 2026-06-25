@@ -31,7 +31,7 @@ Score off the REAL JD — this runs precisely because a fuller, more accurate de
 - **AI-native signal is the biggest lever** — explicit agent-building / LLM-deployment / FDE pushes toward 9–10.
 - **Cast a wide net** on borderline traditional roles (PM, project engineer, pharma R&D are valid) — don't over-filter; when unsure between two bands, take the higher.
 - **Down-rank**: ITAR/clearance (→ ≤2), pure sales with no engineering, IC→junior drops, and same-title/same-level laterals with no comp/scope step up.
-- Location: San Diego / Carlsbad / North County or remote = neutral-to-plus; relocation to a low-interest metro = small minus, not disqualifying.
+- Location: the applicant's home metro (Austin / Central Texas) or remote = neutral-to-plus; relocation to a low-interest metro = small minus, not disqualifying.
 
 ## Output (STRICT)
 

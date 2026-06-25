@@ -5,16 +5,15 @@ WHY THIS EXISTS
 A ledger-grounded regeneration can "converge" to an essay that is TRUTHFUL but POLICY-VIOLATING:
 it volunteers the applicant's visa/citizenship/sponsorship/green-card status in FREE-TEXT application
 content. The accuracy/fabrication gate cannot catch this — the statement is factually true, so the
-ledger judge passes it. The hard policy (memory: feedback_work_auth_answer_policy,
-user_visa_status, user_marriage_july_2026) is: NEVER volunteer immigration status in application
+ledger judge passes it. The hard policy is: NEVER volunteer immigration status in application
 content. Work authorization is handled ONLY in the structured screening dropdowns
 (sponsorship=No / authorized=Yes). The nuance is explained to a HUMAN later, never written into the
 application.
 
-The live violation that motivated this (JOB-237 "Additional Information" essay):
-    "I am a Canadian citizen currently working in the United States on a TN visa, authorized to
-     work for engineering roles that qualify under TN status. I raise this upfront..."
-That exact sentence must produce a BLOCK finding.
+A representative violation this must BLOCK (a free-text "Additional Information" essay):
+    "I currently work in the United States on a work visa and may need sponsorship for this role.
+     I raise this upfront..."
+Any such first-person immigration disclosure must produce a BLOCK finding.
 
 WHAT IT CATCHES (first-person self-disclosure only)
   * visa types: TN, H-1B/H1B, L-1, O-1, OPT, CPT, EAD, work permit/visa, employment visa,
@@ -24,7 +23,7 @@ WHAT IT CATCHES (first-person self-disclosure only)
   * citizenship/nationality in a work-auth context ("I am a Canadian/<nationality> citizen",
     "I am a citizen of ...").
   * volunteered sponsorship ("I require/need/would need sponsorship", "visa sponsorship").
-  * the PRIVATE marriage-GC pathway ("marriage-based", "green card through marriage").
+  * marriage-based green-card disclosures ("marriage-based", "green card through marriage").
 
 PRECISION
 Deterministic regex/keyword, NO LLM. Anchored on FIRST-PERSON + immigration-term co-occurrence so
@@ -149,7 +148,7 @@ _MARRIAGE_GC = re.compile(
 )
 
 # Phrasings that ARE self-disclosure regardless of a separate first-person pronoun: a job-
-# application sentence that says "require visa sponsorship" or names the marriage-GC pathway is a
+# application sentence that says "require visa sponsorship" or names a marriage-based green card is a
 # disclosure no matter how it's framed (these are the highest-risk leaks).
 _ALWAYS = (
     ("sponsorship", _SPONSORSHIP),
